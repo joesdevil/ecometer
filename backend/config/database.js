@@ -4,6 +4,7 @@ dotenv.config();
 
 //database config
 
+console.log("database url setted")
 module.exports = {
     development: {
         connectionString: process.env.DB_URL,
@@ -12,3 +13,5 @@ module.exports = {
         connectionString: process.env.DB_URL,
     },
 };
+
+

@@ -110,11 +110,11 @@ const ReseauxDeChaleurEtFroid = categoriesConnection.model('ReseauxDeChaleurEtFr
 
 const StatistiquesTerritoriales = categoriesConnection.model('StatistiquesTerritoriales', CategoryElementSchema, 'statistiquesterritoriales');
 
-const TraitementDesDechets = categoriesConnection.model('TraitementDesDechets', CategoryElementSchema, 'traitementdechets');
+const TraitementDesDechets = categoriesConnection.model('TraitementDesDechets', CategoryElementSchema, 'traitementdesdechets');
 
-const TransportDeMarchandises = categoriesConnection.model('TransportDeMarchandises', CategoryElementSchema, 'transportmarchandises');
+const TransportDeMarchandises = categoriesConnection.model('TransportDeMarchandises', CategoryElementSchema, 'transportdemarchandises');
 
-const TransportDePersonnes = categoriesConnection.model('TransportDePersonnes', CategoryElementSchema, 'transportpersonnes');
+const TransportDePersonnes = categoriesConnection.model('TransportDePersonnes', CategoryElementSchema, 'transportdepersonnes');
 
 const UTCF = categoriesConnection.model('UTCF', CategoryElementSchema, 'utcf');
 

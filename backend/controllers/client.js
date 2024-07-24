@@ -20,6 +20,7 @@ const { isValidObjectId } = require("mongoose");
 
 // register a client (create a new client)
 const registerClient = async (req, res) => {
+   
   const {
     name,
     email,
@@ -32,9 +33,10 @@ const registerClient = async (req, res) => {
     profilePicture,
   } = req.body;
 
+  console.log("sending body req")
   try {
     // Create a new client using Model.create()
-
+    const profilePicture = req.body.profilePicture; // Should be a base64 string or a valid URL
     const uploadedResponse = await cloudinary.uploader.upload(profilePicture, {
       upload_preset: "ecometer",
       folder: `profile_pictures/${name}`,
@@ -57,6 +59,7 @@ const registerClient = async (req, res) => {
       },
     });
 
+
     // Save the client to the database
     await newClient.save();
     console.log(newClient._id);
@@ -71,9 +74,13 @@ const registerClient = async (req, res) => {
     // Save the verification token to the database
     await newVerificationToken.save();
 
+    console.log("sending email to ",newClient.email)
+
+    console.log("process.env.GMAIL_ADRESS ",process.env.GMAIL_PASS)
+    console.log("process.env.GMAIL_PASS ",newClient.GMAIL_PASS)
     // Send verification email
     mailTransport().sendMail({
-      from: '"Ecometer" <ecometer.team@gmail.com>',
+      from: process.env.EMAIL_USER,
       to: newClient.email,
       subject: "Verify your email account",
       html: emailVerificationTemplate(OTP),
@@ -195,7 +202,7 @@ const verifyEmail = async (req, res) => {
     await VerificationToken.findByIdAndDelete(verificationToken._id);
 
     mailTransport().sendMail({
-      from: '"Ecometer" <ecometer.team@gmail.com>',
+      from: process.env.EMAIL_USER,
       to: client.email,
       subject: "Verification completed successfully",
       html: emailVerifiedTemplate(),
@@ -239,7 +246,7 @@ const forgotPassword = async (req, res) => {
 
   // Send reset password email
   mailTransport().sendMail({
-    from: '"Ecometer" <ecometer.team@gmail.com>',
+    from: process.env.EMAIL_USER,
     to: client.email,
     subject: "Password Reset link",
     html: passwordResetTemplate(client.name, process.env.PWD_RESET_LINK),
@@ -279,7 +286,8 @@ const resetPassword = async (req, res) => {
 
     // Send reset password email
     mailTransport().sendMail({
-      from: '"Ecometer" <ecometer.team@gmail.com>',
+      // from: '"Ecometer" <ecometer.team@gmail.com>',
+      from: process.env.EMAIL_USER,
       to: client.email,
       subject: "Password Reset successful",
       html: passwordResetSuccessTemplate(client.name),

@@ -21,7 +21,7 @@ To run the Carbon Footprint Calculator locally, follow these steps:
 
 1. Clone this repository to your local machine.
    ```
-   git clone https://github.com/AzzouzAimen/Ecometer
+   git clone https://github.com/joesdevil
    ```
 2. Navigate to the project directory.
    ```

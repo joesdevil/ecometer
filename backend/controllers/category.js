@@ -49,7 +49,7 @@ const getCategoryElements = async (req, res) => {
     
     // Query MongoDB to get the next level categories
     const { nextLevelCategories, matchingDocuments, existingCategory } =
-      await getNextLevelCategories(userSelectedCategories);
+    await getNextLevelCategories(userSelectedCategories);
 
     // if selectedcategories are not valid return 404 invalid categories
     if (existingCategory === false) {
@@ -72,7 +72,7 @@ async function getNextLevelCategories(userSelectedCategories) {
   let existingCategory = true;
   const mainCategory = userSelectedCategories[0].replace(/\s+/g, "");
   let Model;
-
+  console.log("mainCategory",mainCategory)
   switch (mainCategory) {
     case "Combustibles":
       Model = categoriesConnection.model("Combustibles");
@@ -121,10 +121,15 @@ async function getNextLevelCategories(userSelectedCategories) {
     categories: { $all: userSelectedCategories },
   });
 
+  console.log("matchingDocuments",matchingDocuments)
   // Extract next level categories from matching documents
   matchingDocuments.forEach((doc) => {
-    const nextCategoryIndex = userSelectedCategories.length;
-    if (doc.categories.length > nextCategoryIndex) {
+     console.log("userSelectedCategories",userSelectedCategories)
+     console.log("userSelectedCategories[userSelectedCategories.length-1]",userSelectedCategories[userSelectedCategories.length-1])
+    const nextCategoryIndex = doc.categories.indexOf(userSelectedCategories[userSelectedCategories.length-1]) + 1;
+    console.log("nextCategoryIndex",nextCategoryIndex)
+    if (doc.categories[nextCategoryIndex]) {
+      
       nextLevelCategories.add(doc.categories[nextCategoryIndex]);
     }
   });

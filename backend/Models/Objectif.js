@@ -31,9 +31,12 @@ const ObjectifSchema = new Schema({
 });
 
 //create model
+console.log("mongo db url",process.env.USERS_URL)
+ 
 const usersConnection = mongoose.createConnection(process.env.USERS_URL);
-// Add error handling
+
 usersConnection.on("error", console.error.bind(console, "connection error:"));
+
 usersConnection.once("open", function () {
   console.log("Connected to users database");
 });

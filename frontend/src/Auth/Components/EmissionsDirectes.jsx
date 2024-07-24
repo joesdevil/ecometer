@@ -195,6 +195,7 @@ function EmissionsDirectes() {
       });
       setnextLevelCategories(res.nextCategories);
       setFe(res.matchingDocuments);
+      console.log("res.matchingDocuments 3",res.matchingDocuments)
       setData([category1]);
     } catch (error) {
       if (
@@ -235,6 +236,7 @@ function EmissionsDirectes() {
         userSelectedCategories: [category1, category2, event.target.value],
       });
       setFe(res.matchingDocuments);
+      console.log("res.matchingDocuments 9 ",res.matchingDocuments)
       setData([category1, category2, category3]);
       console.log(fe);
       console.log(data);
@@ -519,35 +521,27 @@ function EmissionsDirectes() {
                     }
                   >
                     {fe &&
-                      fe
-                        .filter(
-                          (item, index, self) =>
-                            index ===
-                            self.findIndex(
-                              (t) => t.identifier === item.identifier
-                            )
-                        )
-                        .map((item, index) => {
-                          if (
-                            item.elementType === "Elément" ||
-                            item.elementType === "Poste"
-                          ) {
+                      fe.map((item, index) => {
+                        
+                          const displayName =  item["Nom base français"] || item.name;
+                          const unity= item.unity || item["Unité français"]
+                          const idEle = item.id || item["Identifiant de l'élément"]
                             return (
                               <FormControlLabel
                                 key={index}
                                 value={item._id} // Adjust this value as needed
                                 control={<Radio />} // Using Radio component here
                                 label={
-                                  item.name +
+                                  displayName +
                                   "," +
-                                  item.description +
+                                  unity +
                                   ", " +
-                                  item.unit
+                                  idEle
                                 } // Adjust this label as needed
                               />
                             );
-                          }
-                          return null; // Skip rendering if condition doesn't match
+                          
+                          
                         })}
                   </RadioGroup>
                 </FormControl>
