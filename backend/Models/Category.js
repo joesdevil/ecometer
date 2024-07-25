@@ -45,6 +45,10 @@ const CategoryElementSchema = new Schema({
       type: String ,
       default: null 
     },
+    Incertitude: {  // Replaces Incertitude
+      type: String ,
+      default: null 
+    },
     postType: {  // Replaces Type Poste
       type: String,
       default: null,
@@ -53,22 +57,34 @@ const CategoryElementSchema = new Schema({
       type: Number,
       required: [true, 'totalPostValue field is required']
     },
-    co2: {  // Replaces CO2f
+    CO2: {  // Replaces CO2f
       type: Number,
       default: null
     },
-    ch4: {  // Replaces CH4f
+    CO2f: {  // Replaces CO2f
       type: Number,
       default: null
     },
-    ch4b: {  // Replaces CH4b - No change needed as requested
+    CH4: {  // Replaces CH4f
       type: Number,
       default: null
     },
-    n2o: {  // Replaces N2O
+    CH4b: {  // Replaces CH4b - No change needed as requested
       type: Number,
       default: null
     },
+    CH4f: {  // Replaces CH4b - No change needed as requested
+      type: Number,
+      default: null
+    },
+    N2O: {  // Replaces N2O
+      type: Number,
+      default: null
+    },
+    'Total poste non décomposé':{
+      type: Number,
+      default: null
+    }
   });
 
   // Define a pre-save middleware to parse and convert the last five fields to floating-point numbers

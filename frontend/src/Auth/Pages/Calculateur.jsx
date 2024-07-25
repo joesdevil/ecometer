@@ -205,18 +205,20 @@ function Calculateur() {
   const navigate = useNavigate();
   const handleReset = async () => {
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
+    console.log("handleReset bilan",bilan)
     const token = localStorage.getItem("token");
-    try {
+    
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-
-      const url = "http://localhost:3000/api/bilans/calculate-bilan";
+      
+      console.log("headers",headers)
+      const url = "http://localhost:3000/api/bilans/calculateBilan";
+      const url1 = "http://localhost:3000/api/bilans/create-bilan";
+      const response1 = await axios.post(url1, bilan, { headers: headers });
       const response = await axios.post(url, bilan, { headers: headers });
       localStorage.setItem("ClientBilan", JSON.stringify(response.data));
-    } catch (err) {
-      console.log(err);
-    }
+   
     navigate("/rapport");
   };
 

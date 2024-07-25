@@ -32,6 +32,7 @@ const mainCategories = [
 
 // Function to get the next level categories and matching documents
 
+
 const getCategoryElements = async (req, res) => {
   // Define API endpoint to handle user-selected categories
   try {
@@ -123,9 +124,7 @@ async function getNextLevelCategories(userSelectedCategories) {
 
   console.log("matchingDocuments",matchingDocuments)
   // Extract next level categories from matching documents
-  matchingDocuments.forEach((doc) => {
-     console.log("userSelectedCategories",userSelectedCategories)
-     console.log("userSelectedCategories[userSelectedCategories.length-1]",userSelectedCategories[userSelectedCategories.length-1])
+  matchingDocuments.forEach((doc) => { 
     const nextCategoryIndex = doc.categories.indexOf(userSelectedCategories[userSelectedCategories.length-1]) + 1;
     console.log("nextCategoryIndex",nextCategoryIndex)
     if (doc.categories[nextCategoryIndex]) {
@@ -137,4 +136,52 @@ async function getNextLevelCategories(userSelectedCategories) {
   return { nextLevelCategories, matchingDocuments, existingCategory };
 }
 
-module.exports = { getCategoryElements };
+
+
+
+const multer = require('multer');
+const { exec } = require('child_process');
+const path = require('path');
+
+const app = express(); 
+
+// Configure Multer for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Define the upload route
+async function uploadExcelToMongo(req, res){
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+   
+  const filePath = path.join(__dirname, '../uploads', req.file.filename);
+  const mongoUri = 'mongodb://localhost:27017/';
+
+  // Call the Python script
+  exec(`python upload_to_mongo.py "${filePath}" "${mongoUri}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing script: ${error.message}`);
+      return res.status(500).send('Error processing file.');
+    }
+    if (stderr) {
+      console.error(`Script stderr: ${stderr}`);
+      return res.status(500).send('Error processing file.');
+    }
+    console.log(`Script stdout: ${stdout}`);
+    res.send('File uploaded and processed successfully.');
+    
+  });
+};
+
+
+module.exports = { getCategoryElements,uploadExcelToMongo };

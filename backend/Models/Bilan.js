@@ -29,6 +29,9 @@ const emissionPostSchema = new mongoose.Schema({
   CO2: { type: Number, default: 0 },
   CH4: { type: Number, default: 0 },
   N2O: { type: Number, default: 0 },
+  CO2f: { type: Number, default: 0 },
+  CH4b: { type: Number, default: 0 },
+  CH4f: { type: Number, default: 0 },
   categoryElements: {
     type: [usedElements],
     default: [], // default value is an empty array , the model depends on the category

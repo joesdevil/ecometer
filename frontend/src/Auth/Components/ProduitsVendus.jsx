@@ -508,19 +508,8 @@ function ProduitsVendu() {
                     }
                   >
                     {fe &&
-                      fe
-                        .filter(
-                          (item, index, self) =>
-                            index ===
-                            self.findIndex(
-                              (t) => t.identifier === item.identifier
-                            )
-                        )
-                        .map((item, index) => {
-                          if (
-                            item.elementType === "Elément" ||
-                            item.elementType === "Poste"
-                          ) {
+                      fe.map((item, index) => {
+                         
                             const displayName = item.name || item["Nom base français"];
                             const unity= item.unity || item["Unité français"]
                             const idEle = item.id || item["Identifiant de l'élément"]
@@ -538,8 +527,7 @@ function ProduitsVendu() {
                                   } // Adjust this label as needed
                                 />
                               );
-                          }
-                          return null; // Skip rendering if condition doesn't match
+                           // Skip rendering if condition doesn't match
                         })}
                   </RadioGroup>
                 </FormControl>

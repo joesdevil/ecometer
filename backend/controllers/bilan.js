@@ -51,7 +51,8 @@ const updateAndCalculateBilan = async (req, res) => {
   if (!isValidObjectId(clientId)) {
     return res.status(400).json({ msg: "Invalid client ID" });
   }
-  try {
+  
+  
     const carbonFootprint = await CarbonFootprint.findOne({ clientId, year });
     if (!carbonFootprint) {
       return res.status(404).json({ msg: "Bilan not found" });
@@ -59,31 +60,62 @@ const updateAndCalculateBilan = async (req, res) => {
     for (let i = 0; i < selectedCategoryElements.length; i++) {
       const categoryElements = selectedCategoryElements[i];
       if (categoryElements.length > 0) {
-        const { emissions, weightedAverageUncertainty, CO2, CH4, N2O } =
+        
+       
+
+
+        const { emissions, weightedAverageUncertainty, CO2 ,CH4 , N2O ,CO2f,CH4f,CH4b } =
           await calculateEmissionsPost(
             carbonFootprint.emissionPosts[i].category,
             categoryElements
           );
-        carbonFootprint.emissionPosts[i].emissions = emissions;
-        carbonFootprint.emissionPosts[i].uncertainty =
-          weightedAverageUncertainty;
-        carbonFootprint.emissionPosts[i].categoryElements = categoryElements;
-        carbonFootprint.emissionPosts[i].CO2 = CO2;
-        carbonFootprint.emissionPosts[i].CH4 = CH4;
-        carbonFootprint.emissionPosts[i].N2O = N2O;
+          
+          if(!isNaN(emissions)){
+            carbonFootprint.emissionPosts[i].emissions = emissions;
+          }
+          
+          if(!isNaN(weightedAverageUncertainty)){
+            carbonFootprint.emissionPosts[i].uncertainty =weightedAverageUncertainty;
+          }
+           
+          if(!isNaN(categoryElements)){
+            carbonFootprint.emissionPosts[i].categoryElements = categoryElements;
+          }
+          if(!isNaN(CO2)){
+            carbonFootprint.emissionPosts[i].CO2 = CO2;
+          }
+          if(!isNaN(CH4)){
+            carbonFootprint.emissionPosts[i].CH4 = CH4;
+          }
+          if(!isNaN(N2O)){
+            carbonFootprint.emissionPosts[i].N2O = N2O;
+          }
+          if(!isNaN(CO2f)){
+            carbonFootprint.emissionPosts[i].CO2f = CO2f;
+          }
+          if(!isNaN(CH4f)){
+            carbonFootprint.emissionPosts[i].CH4f = CH4f;
+          }
+          if(!isNaN(CH4b)){
+            carbonFootprint.emissionPosts[i].CH4b = CH4b;
+          }
+        
+        
+        
+        
+       
       }
     }
 
     const { totalEmissions, totalWeightedAverageUncertainty } =
       await calculateTotalBilan(carbonFootprint.emissionPosts);
+    
     carbonFootprint.totalEmissions = totalEmissions;
     carbonFootprint.totalUncertainty = totalWeightedAverageUncertainty;
     await carbonFootprint.save();
+    
     return res.status(200).json(carbonFootprint);
-  } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({ error: "Internal error" });
-  }
+  
 };
 
 //calculate the emissions for a single post Emission
@@ -94,34 +126,85 @@ const calculateEmissionsPost = async (category, categoryElements) => {
   let CO2 = 0;
   let CH4 = 0;
   let N2O = 0;
+  let CO2f= 0;
+  let CH4f= 0;
+  let CH4b= 0;
   let i = 0;
+  
   const Model = categoriesConnection.model(category);
   for (const element of categoryElements) {
+    
     const categoryElement = await Model.findById(element.categoryElement);
-    emissions += categoryElement.totalPostValue * element.quantity;
+    // emissions += categoryElement.totalPostValue * element.quantity;
+    emissions += categoryElement["Total poste non décomposé"] * element.quantity;
+ 
+    const incertNumber=categoryElement.Incertitude.replace("%","")
     const uncertaintyPercentage =
-      categoryElement.uncertainty !== null
-        ? parseFloat(categoryElement.uncertainty) / 100
-        : 0;
-    const uncertainty =
-      categoryElement.totalPostValue * uncertaintyPercentage * element.quantity;
+      categoryElement.Incertitude !== null
+        ? parseFloat(incertNumber) / 100
+        : 0; 
+    const uncertainty =categoryElement["Total poste non décomposé"] * uncertaintyPercentage * element.quantity;
     totalValueTimesUncertainty += uncertainty;
-    totalValue += categoryElement.totalPostValue * element.quantity;
-    if (categoryElement.structure === "élément décomposé par gaz") {
+    
+    totalValue += categoryElement["Total poste non décomposé"] * element.quantity;
+    
+    if (categoryElement.structure === "élément décomposé par gaz" || categoryElement.structure === "élément décomposé par poste et par gaz") {
       //console.log("element décomposé par gaz");
-      CO2 += categoryElement.co2 * element.quantity;
-      CH4 += categoryElement.ch4 * element.quantity;
-      N2O += categoryElement.n2o * element.quantity;
+      
+        if(categoryElement.CO2){
+          CO2 += (categoryElement.CO2 * element.quantity);
+          
+        }
+
+        if(categoryElement.CH4 ){
+          CH4 += (categoryElement.CH4 * element.quantity);
+    
+        }
+        
+        if(categoryElement.N2O){
+          N2O += (categoryElement.N2O * element.quantity);
+       
+        }
+       
+        
+        if(categoryElement.CO2f ){
+
+      
+          CO2f += (categoryElement.CO2f * element.quantity);
+          console.log("CO2f", categoryElement.CO2f, element.quantity, CO2f);
+        }
+        
+      if(categoryElement.CH4f){
+        CH4f += (categoryElement.CH4f * element.quantity);
+       
+      }
+      
+       if(categoryElement.CH4b){
+        CH4b += (categoryElement.CH4b * element.quantity);
+       }
+       
       //if (i == 1) {CO2 = "NC"}
     }
+     
+    
     i++;
+    
   }
+
   if (totalValueTimesUncertainty !== 0) {
     const weightedAverageUncertainty = totalValueTimesUncertainty / totalValue;
-    return { emissions, weightedAverageUncertainty, CO2, CH4, N2O };
+    
+    return { emissions, weightedAverageUncertainty, CO2 ,
+      CH4 ,
+      N2O ,
+      CO2f,
+      CH4f,
+      CH4b};
   }
   //console.log("Co2", CO2);
-  return { emissions, weightedAverageUncertainty: 0, CO2, CH4, N2O };
+  return { emissions, weightedAverageUncertainty: 0, CO2, CH4, N2O,CO2f,
+    CH4f,
+    CH4b };
 };
 
 const calculateWeightedAverageUncertainty = (elements) => {

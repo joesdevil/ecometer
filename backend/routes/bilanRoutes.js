@@ -12,7 +12,7 @@ const router = express.Router();
 
 // post requests
 
-router.post("/calculate-bilan", updateAndCalculateBilan);
+router.post("/calculateBilan", updateAndCalculateBilan);
 router.post("/create-bilan", createBilan);
 
 // get requests

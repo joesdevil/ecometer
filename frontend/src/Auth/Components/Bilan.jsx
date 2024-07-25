@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Grid, Typography, Paper, Button, Select } from "@mui/material";
+import { Grid, Typography, Paper, Button, Select, CircularProgress } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios"; // Import axios
+
 // Définir un nouveau thème personnalisé
 const newTheme = createTheme({
   components: {
@@ -76,8 +78,12 @@ const Styles = {
     lineHeight: "30px",
   },
 };
+ 
 
-function Bilan({ showBilan, setShowBilan }) {
+
+
+function Bilan({ showBilan, setShowBilan }) { 
+  
   const data = {
     year: 2024,
     clientId: "66661fd621a877d16ef65508", //localStorage.getItem("clientId"),
@@ -114,10 +120,30 @@ function Bilan({ showBilan, setShowBilan }) {
     //   localStorage.setItem("Bilan", data);
     // }
   };
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('excelfile', file);
+    console.log("uploading file")
+    setLoading(true)
+    try {
+      const response = await axios.post('http://localhost:3000/api/categories/uploadExcelToMongo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('File uploaded successfully:', response.data);
+      setLoading(false)
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setLoading(false);
+    }
+  };
   const pays = [{ id: 1, name: "Algerie" }];
   const wilayas = ["Alger", "Oran", "Tizi Ouzou"];
   const [selectedPays, setSelectedPays] = useState("");
   const [selectedWilaya, setSelectedWilaya] = useState("");
+  const [loading, setLoading] = useState(false);
   return (
     <div>
       <ThemeProvider theme={newTheme}>
@@ -211,6 +237,7 @@ function Bilan({ showBilan, setShowBilan }) {
                 </Grid>
               </Grid>
             </Grid>
+
             <Grid item md={12} xs={12}>
               <Grid container spacing={2}>
                 <Grid item md={4.2} xs={12}>
@@ -248,6 +275,38 @@ function Bilan({ showBilan, setShowBilan }) {
                 </Grid>
               </Grid>
             </Grid>
+
+
+
+            <Grid item md={12} xs={12}>
+              <Grid container spacing={2}>
+                <Grid item md={4.2} xs={12}>
+                  <Typography style={Styles.bodyText}>Excel db file</Typography>
+                  <input onChange={handleFileUpload} fullWidth type="file" name="excelfile" id="excelfile"  sx={{
+                      borderRadius: "15px",
+
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FC !important",
+                        borderRadius: "15px",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FC !important",
+                        borderRadius: "15px",
+                      },
+                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FCD !important",
+                        borderRadius: "15px",
+                      },
+                    }}/>
+                   {loading && <CircularProgress />}
+                    
+                    
+                
+                </Grid>
+              </Grid>
+            </Grid>
+            
+            
             <Grid item md={12} xs={12}>
               <Grid container direction="row-reverse">
                 <Grid item md={"2.36"} xs={12}>
@@ -270,3 +329,6 @@ function Bilan({ showBilan, setShowBilan }) {
 }
 
 export default Bilan;
+
+
+
