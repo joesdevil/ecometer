@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+import {  CircularProgress } from "@mui/material";
 import {
   Grid,
   Typography,
@@ -13,6 +15,7 @@ import {
 } from "@mui/material";
 import AppBarComponent from ".././Components/AppBarComponent";
 import EmissionsDirectes from "../Components/EmissionsDirectes";
+import Alimentaire from "../Components/AGRIBALYSE/Alimentaire";
 import Deplacement from "../Components/Deplacement";
 import Energie from "../Components/Energie";
 import ProduitsVendu from "../Components/ProduitsVendus";
@@ -22,6 +25,8 @@ import SideBar from "../Components/SideBar";
 import CustomStepConnector from "./CustomStepConnector";
 import ColorlibStepIcon from "./ColorlibStepIcon";
 import Bilan from "../Components/Bilan";
+import { toast } from 'react-toastify';
+
 
 const Styles = {
   titreEtape: {
@@ -84,7 +89,20 @@ const Styles = {
 
 function Calculateur() {
   const [showBilan, setShowBilan] = useState(false);
+  const [emissionsListAgribalyse,setEmissionsListAgribalyse]=useState([
+    {
+      label: "émissions de produits alimentaire",
+      dialogueOptions: [{ label: "Produits alimentaires", value: 1 }],
+      selectedOptions: [],
+    },
+    {
+      label: "émissions de produits agricoles",
+      dialogueOptions: [{ label: "Produits Agricoles", value: 1 }],
+      selectedOptions: [],
+    },
+  ])
   const [emissionsList, setEmissionsList] = useState([
+   
     {
       label: "émissions directes des sources fixes de combustion",
       dialogueOptions: [{ label: "Combustibles", value: 1 }],
@@ -204,6 +222,7 @@ function Calculateur() {
   };
   const navigate = useNavigate();
   const handleReset = async () => {
+    setLoading(true)
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("handleReset bilan",bilan)
     const token = localStorage.getItem("token");
@@ -212,29 +231,50 @@ function Calculateur() {
         Authorization: `Bearer ${token}`,
       };
       
-      console.log("headers",headers)
-      const url = "http://localhost:3000/api/bilans/calculateBilan";
+      
+      const url = `http://localhost:3000/api/bilans/calculateBilan/${selectedDB}`;
+      
       const url1 = "http://localhost:3000/api/bilans/create-bilan";
       const response1 = await axios.post(url1, bilan, { headers: headers });
       const response = await axios.post(url, bilan, { headers: headers });
       localStorage.setItem("ClientBilan", JSON.stringify(response.data));
-   
-    navigate("/rapport");
+      setLoading(false)
+      if(allArraysEmpty(bilan.selectedCategoryElements)){
+        toast.error("not selected category elements!")
+      }else{
+        toast.success("calculated successfully")
+        navigate("/rapport");
+      }
+       
+    
   };
+  function allArraysEmpty(arrays) {
+    return arrays.every(array => array.length === 0);
+}
 
-  const steps = [
-    { label: "Emissions directes", icon: 1, backgroundColor: "#F0F2F7" },
-    { label: "Energie", icon: 2, backgroundColor: "#E0E5EC" },
-    { label: "Déplacement", icon: 3, backgroundColor: "#D1D9E4" },
-    { label: "Produits Achetés", icon: 4, backgroundColor: "#C1CDE0" },
-    { label: "Produits Vendus", icon: 5, backgroundColor: "#C1CDE0" },
-    {
-      label: "Autres émissions indirectes",
-      icon: 6,
-      backgroundColor: "#B2C8DC",
-    },
-  ];
+  const steps = {
+    "ADEME":[
+      { label: "Emissions directes", icon: 1, backgroundColor: "#F0F2F7" },
+      { label: "Energie", icon: 2, backgroundColor: "#E0E5EC" },
+      { label: "Déplacement", icon: 3, backgroundColor: "#D1D9E4" },
+      { label: "Produits Achetés", icon: 4, backgroundColor: "#C1CDE0" },
+      { label: "Produits Vendus", icon: 5, backgroundColor: "#C1CDE0" },
+      {
+        label: "Autres émissions indirectes",
+        icon: 6,
+        backgroundColor: "#B2C8DC",
+      },
+    ],
+    "AGRIBALYSE":[
+      { label: "produits et agricoles", icon: 4, backgroundColor: "#C1CDE0" },
+      
+    ]
 
+  }
+  const selectedDB= localStorage.getItem("db_type")
+  console.log("selectedDB",selectedDB)
+  
+  const [loading, setLoading] = useState(false);
   return (
     <Grid container>
       <Grid
@@ -284,7 +324,7 @@ function Calculateur() {
                           gutterBottom
                           style={Styles.titreEtape}
                         >
-                          {steps[activeStep].label}
+                          {steps[selectedDB][activeStep].label}
                         </Typography>
                       </Grid>
 
@@ -294,7 +334,7 @@ function Calculateur() {
                           alternativeLabel
                           connector={<CustomStepConnector />}
                         >
-                          {steps.map((step, index) => (
+                          {steps[selectedDB].map((step, index) => (
                             <Step key={index}>
                               <StepLabel
                                 StepIconComponent={ColorlibStepIcon}
@@ -337,37 +377,46 @@ function Calculateur() {
                           scrollbarWidth: "thin",
                         }}
                       >
-                        {activeStep === 0 && (
+                         
+                        {activeStep === 0 && selectedDB=="ADEME" && (
                           <EmissionsDirectes
                             emissionsList={emissionsList}
                             setEmissionsList={setEmissionsList}
                           />
                         )}
-                        {activeStep === 1 && (
+
+                        {activeStep === 0 && selectedDB=="AGRIBALYSE" && (
+                          <Alimentaire
+                            emissionsList={emissionsListAgribalyse}
+                            setEmissionsList={setEmissionsListAgribalyse}
+                          />
+                        )}
+
+                        {activeStep === 1 && selectedDB=="ADEME" && (
                           <Energie
                             energieList={energieList}
                             setEnergieList={setEnergieList}
                           />
                         )}
-                        {activeStep === 2 && (
+                        {activeStep === 2  && selectedDB=="ADEME" && (
                           <Deplacement
                             deplacementList={deplacementList}
                             setDeplacementList={setDeplacementList}
                           />
                         )}
-                        {activeStep === 3 && (
+                        {activeStep === 3 && selectedDB=="ADEME" && (
                           <ProduitsAchetes
                             produitsAchetesList={produitsAchetesList}
                             setProduitsAchetesList={setProduitsAchetesList}
                           />
                         )}
-                        {activeStep === 4 && (
+                        {activeStep === 4 && selectedDB=="ADEME" && (
                           <ProduitsVendu
                             produitsVendusList={produitsVendusList}
                             setProduitsVendusList={setProduitsVendusList}
                           />
                         )}
-                        {activeStep === 5 && <AutresEmissions />}
+                        {activeStep === 5 && selectedDB=="ADEME" && <AutresEmissions />}
                       </Grid>
 
                       <Grid item xs={12} md={10} sx={{ marginTop: "30px" }}>
@@ -388,16 +437,18 @@ function Calculateur() {
                               Retour
                             </Typography>
                           </Button>
+                          
+              {loading && <CircularProgress />}
                           <Button
                             onClick={
-                              activeStep === steps.length - 1
+                              activeStep === steps[selectedDB].length - 1
                                 ? handleReset
                                 : handleNext
                             }
                             style={Styles.suivantButton}
                           >
                             <Typography style={Styles.buttonText}>
-                              {activeStep === steps.length - 1
+                              {activeStep === steps[selectedDB].length - 1
                                 ? "Calculer Bilan"
                                 : "Suivant"}
                             </Typography>

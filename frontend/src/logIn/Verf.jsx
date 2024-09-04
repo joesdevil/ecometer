@@ -1,8 +1,13 @@
 import React from "react";
+import { useState } from "react";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import { MuiOtpInput } from "mui-one-time-password-input";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
+
 
 function Verf() {
   const [otp, setOtp] = React.useState("");
@@ -29,11 +34,13 @@ function Verf() {
   };
 
   const handleVerification = async () => {
+    setLoading(true)
     try {
       // Set the Authorization header with the token
       const headers = {
         Authorization: `Bearer ${token}`,
       };
+      
 
       const response = await axios.post(
         "http://localhost:3000/api/clients/verify-email",
@@ -42,13 +49,16 @@ function Verf() {
       );
       console.log("verification response:", response.data);
       localStorage.setItem("verifiedEmail", true);
+      setLoading(false)
       navigate("/acceuil");
     } catch (error) {
       // Handle any errors
       console.error("Error during verification:", error);
+      toast.error("Error during verification")
+      setLoading(false)
     }
   };
-
+  const [loading, setLoading] = useState(false);
   return (
     <div className="realtive font-['Inter']">
       <img
@@ -61,6 +71,7 @@ function Verf() {
           <div className="text-center text-neutral-800 w-full h-[20%] text-[4.8vh] font-bold font-['Eudoxus Sans'] pt-[4vh]">
             Vérification
           </div>
+          {loading && <CircularProgress />}
           <div className="text-center text-neutral-800 w-[86%] mx-auto  h-[25%] text-[2.2vh] font-bold font-['Eudoxus Sans'] pt-[4vh]">
             Saisissez votre code à 6 chiffres que vous avez reçu sur votre
             email.
@@ -99,8 +110,10 @@ function Verf() {
               </a>
             </div>
           </button>
+          
         </div>
       </div>
+      
     </div>
   );
 }

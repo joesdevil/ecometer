@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import CroixIcon from "./CroixIcon";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
 
 const Styles = {
   contenuEtape: {
@@ -194,16 +196,19 @@ function Deplacement() {
   const [fe, setFe] = useState();
   const handleCategory2 = async (event) => {
     try {
+      setLoading(true)
       setCategory1(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [event.target.value],
       });
       setnextLevelCategories(res.nextCategories);
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 2",res.matchingDocuments)
+      setFe(res.matchingDocuments); 
+      setLoading(false)
       setData([category1]);
+      
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -216,14 +221,17 @@ function Deplacement() {
   };
   const handleCategory3 = async (event) => {
     try {
+      setLoading(true)
       setCategory2(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories2(res.nextCategories);
       setData([category1, category2]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -236,17 +244,18 @@ function Deplacement() {
   };
   const handleFe = async (event) => {
     try {
+      setLoading(true)
       setCategory3(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, category2, event.target.value],
       });
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 11 ",res.matchingDocuments)
+      setLoading(false)
+      setFe(res.matchingDocuments); 
       setData([category1, category2, category3]);
-      console.log(fe);
-      console.log(data);
+     
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -302,6 +311,7 @@ function Deplacement() {
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }
     localStorage.setItem("Bilan", JSON.stringify(bilan));
   };
+  const [loading, setLoading] = useState(false);
   return (
     <div>
       {deplacementList.map((produit, index) => (
@@ -371,7 +381,7 @@ function Deplacement() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                Quantité :
+                              {option.split(",")[1]=="%" || option.split(",")[1]=="tonne" || option.split(",")[1]=="voitures"|| option.split(",")[1]=="tonne.km" || option.split(",")[1]=="km"|| option.split(",")[1]=="passagers"|| option.split(",")[1]=="m³"?"Quantité " + option.split(",")[1]  + ":":"Combien " + option.split(",")[1].split("/")[1] + " :"}
                               </Typography>
                             </Grid>
 
@@ -526,14 +536,28 @@ function Deplacement() {
                       )
                     }
                   >
+                    {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
                           
                             const displayName = item.name || item["Nom base français"];
                             const unity= item.unity || item["Unité français"]
-                            const idEle = item.id || item["Identifiant de l'élément"]
+                            const type = item["Type Ligne"]
+                            let nomAttr= item["Nom attribut français"]
+                            const id =item["Identifiant de l'élément"]
+                          let nomfrontiere=item["Nom frontière français"]
+
+                          if(nomAttr=="NaN"){
+                             nomAttr=""
+                             
+                          }
+                          if(nomfrontiere=="NaN"){
+                            nomfrontiere=""
+                            
+                         }
                             return (
-                              <FormControlLabel
+                              type== "Elément" &&
+                             ( <FormControlLabel
                                 key={index}
                                 value={item._id} // Adjust this value as needed
                                 control={<Radio />} // Using Radio component here
@@ -541,10 +565,11 @@ function Deplacement() {
                                   displayName +
                                   "," +
                                   unity +
-                                  ", " +
-                                  idEle
+                                  ", "  +
+                                  nomAttr+ " , "
+                                  + nomfrontiere
                                 } // Adjust this label as needed
-                              />
+                              />)
                             );
                           // Skip rendering if condition doesn't match
                         })}

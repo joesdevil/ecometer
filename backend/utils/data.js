@@ -43,6 +43,12 @@ const FixedPosteAttributs = [
     Scope: "2",
   },
   {
+    index: "2.3",
+    postName: "Emissions indirectes liées à la consommation d'électricité par pays",
+    category: "ElectriciteParPays",
+    Scope: "2",
+  },
+  {
     index: "3.1",
     postName: "Transport de marchandise amont",
     category: "TransportDeMarchandises",
@@ -126,10 +132,17 @@ const FixedPosteAttributs = [
     category: "AchatsDeServices",
     Scope: "3",
   },
+  
   {
-    index: "6.1",
-    postName: "Autres émissions indirecte",
-    category: "Combustibles",
+    index: "7.1",
+    postName: " émissions de produits alimentaires",
+    category: "Produitsalimentaires",
+    Scope: "1",
+  },
+  {
+    index: "7.2",
+    postName: "émissions de produits agricoles",
+    category: "Produitsagricoles",
     Scope: "1",
   },
 ];
@@ -139,11 +152,15 @@ const validCategories = [
   "Combustibles",
   "ProcessEtEmissionFugitives",
   "Electricite",
+  "ElectriciteParPays",
   "ReseauxDeChaleurEtFroid",
   "StatistiquesTerritoriales",
   "TraitementDesDechets",
   "TransportDeMarchandises",
   "TransportDePersonnes",
   "UTCF",
+  "Produitsagricoles",
+  "Produitsagricoles1",
+  "Produitsalimentaires",
 ];
 module.exports = { FixedPosteAttributs , validCategories}

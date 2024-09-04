@@ -6,13 +6,18 @@ const {
   Combustibles,
   ProcessEtEmissionFugitives,
   Electricite,
+  ElectriciteParPays,
   ReseauxDeChaleurEtFroid,
   StatistiquesTerritoriales,
   TraitementDesDechets,
   TransportDeMarchandises,
   TransportDePersonnes,
   UTCF,
+  Produitsagricoles1,
+  Produitsagricoles,
+  Produitsalimentaires,
   categoriesConnection,
+  categoriesConnection2
 } = require("../Models/Category");
 const Client = require("../Models/Client");
 const validCategories = require("../utils/data").validCategories;
@@ -44,6 +49,7 @@ const getEmissionFactors = async (req, res) => {
       return res.status(400).json({ error: (selectedCategorie + " is an invalid category") });
     }
     const factors = await categoriesConnection.model(selectedCategorie).find();
+    console.log("factors",factors)
     res.json({ factors });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

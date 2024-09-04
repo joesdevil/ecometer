@@ -17,6 +17,9 @@ import {
   
 } from "@mui/material";
 import CroixIcon from "./CroixIcon";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
+
 const Styles = {
   contenuEtape: {
     fontSize: "18px",
@@ -158,7 +161,7 @@ function EmissionsDirectes() {
       selectedOptions: [],
     },
     {
-      label: "émissions directes fugitives",
+      label: "émissions directes fugitivess",
       ind: 3,
       dialogueOptions: [
         {
@@ -189,15 +192,17 @@ function EmissionsDirectes() {
   const handleCategory2 = async (event) => {
     try {
       setCategory1(event.target.value);
+      setLoading(true)
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories(res.nextCategories);
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 3",res.matchingDocuments)
+      setFe(res.matchingDocuments); 
       setData([category1]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -211,13 +216,16 @@ function EmissionsDirectes() {
   const handleCategory3 = async (event) => {
     try {
       setCategory2(event.target.value);
+      setLoading(true)
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories2(res.nextCategories);
       setData([category1, category2]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -230,17 +238,18 @@ function EmissionsDirectes() {
   };
   const handleFe = async (event) => {
     try {
+      setLoading(true)
       setCategory3(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, category2, event.target.value],
       });
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 9 ",res.matchingDocuments)
+      setLoading(false)
+      setFe(res.matchingDocuments); 
       setData([category1, category2, category3]);
-      console.log(fe);
-      console.log(data);
+     
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -296,6 +305,7 @@ function EmissionsDirectes() {
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }
     localStorage.setItem("Bilan", JSON.stringify(bilan));
   };
+  const [loading, setLoading] = useState(false);
   return (
     <div>
       {emissionsList.map((produit, index) => (
@@ -322,6 +332,7 @@ function EmissionsDirectes() {
                 produit.selectedOptions.length > 0 && (
                   <Grid style={{ marginTop: "15px" }}>
                     {produit.selectedOptions.map((option, optionIndex) => (
+                       
                       <Grid
                         key={optionIndex}
                         container
@@ -333,6 +344,7 @@ function EmissionsDirectes() {
                           borderColor: "#6F6C8F",
                         }}
                       >
+                        
                         <Grid item md={12}>
                           <Grid container>
                             <Grid
@@ -365,10 +377,10 @@ function EmissionsDirectes() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                Quantité :
+                                 {option.split(",")[1].split("/")[1]?"Quantité " + option.split(",")[1].split("/")[1] + ":":""}
                               </Typography>
                             </Grid>
-
+                            { option.split(",")[3]=="ratio de charge" ? 
                             <Grid item xs={12} md={10.4}>
                               <TextField
                                 type="number"
@@ -402,6 +414,116 @@ function EmissionsDirectes() {
                                 save
                               </Button>
                             </Grid>
+                            :
+                            <Grid item xs={12} md={10.4}>
+                            <TextField
+                              type="number"
+                              variant="outlined"
+                              fullWidth
+                              sx={{
+                                borderRadius: "15px",
+                                mt: 1,
+                                mb: 2,
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#969696 !important", // Couleur de la bordure
+                                  borderRadius: "15px",
+                                },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                  borderRadius: "15px",
+                                },
+                                "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                  {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                    borderRadius: "15px",
+                                  },
+                              }}
+                              onChange={handleChange}
+                            />
+                            <Button
+                              variant="contained"
+                              href="#contained-buttons"
+                              onClick={handleSave}
+                            >
+                              save
+                            </Button>
+                          </Grid>
+
+                              }
+                           { option.split(",")[3]=="taux de fuite annuel" && 
+                            <Grid item xs={12} md={10.4}>
+                              depuis quelle années tu l'as:
+                              <TextField
+                                type="number"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  borderRadius: "15px",
+                                  mt: 1,
+                                  mb: 2,
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure
+                                    borderRadius: "15px",
+                                  },
+                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                    borderRadius: "15px",
+                                  },
+                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                    {
+                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                      borderRadius: "15px",
+                                    },
+                                }}
+                                onChange={handleChange}
+                              />
+                              <Button
+                                variant="contained"
+                                href="#contained-buttons"
+                                onClick={handleSave}
+                              >
+                                save
+                              </Button>
+                            </Grid>
+
+                              }
+                              { option.split(",")[3]=="taux de fuite en fin de vie" && 
+                            <Grid item xs={12} md={10.4}>
+                              déjà jeté (si oui, en quelle année) ?:
+                              <TextField
+                                type="number"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  borderRadius: "15px",
+                                  mt: 1,
+                                  mb: 2,
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure
+                                    borderRadius: "15px",
+                                  },
+                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                    borderRadius: "15px",
+                                  },
+                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                    {
+                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                      borderRadius: "15px",
+                                    },
+                                }}
+                                onChange={handleChange}
+                              />
+                              <Button
+                                variant="contained"
+                                href="#contained-buttons"
+                                onClick={handleSave}
+                              >
+                                save
+                              </Button>
+                            </Grid>
+
+                              }
                           </Grid>
                         </Grid>
                       </Grid>
@@ -520,12 +642,27 @@ function EmissionsDirectes() {
                       )
                     }
                   >
+                    {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
                         
-                          const displayName =  item["Nom base français"] || item.name;
+                          const displayName =  item["Nom base français"] ;
                           const unity= item.unity || item["Unité français"]
-                          const idEle = item.id || item["Identifiant de l'élément"]
+                          const tags  =  item["Tags français"]
+                          let nomAttr= item["Nom attribut français"]
+                          let nomfrontiere=item["Nom frontière français"]
+
+                          if(nomAttr=="NaN" || nomAttr=="null"){
+                             nomAttr=""
+                             
+                          }
+                          if(nomfrontiere=="NaN" || nomfrontiere=="null"){
+                            nomfrontiere=""
+                            
+                         }
+                          
+                          
+                           
                             return (
                               <FormControlLabel
                                 key={index}
@@ -533,10 +670,11 @@ function EmissionsDirectes() {
                                 control={<Radio />} // Using Radio component here
                                 label={
                                   displayName +
-                                  "," +
+                                  " , " +
                                   unity +
-                                  ", " +
-                                  idEle
+                                  " , " +
+                                  nomAttr+ " , "
+                                  + nomfrontiere + ", "+ tags
                                 } // Adjust this label as needed
                               />
                             );

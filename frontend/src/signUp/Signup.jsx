@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
+
 // the sign up fonction
 function Signup() {
   const [data, setData] = useState({
@@ -84,8 +87,10 @@ function Signup() {
         setError("Les mots de passe ne correspondent pas");
         return;
       }
+      setLoading(true)
       const url = "http://localhost:3000/api/clients/register";
       const { data: res } = await axios.post(url, data);
+      setLoading(false)
       navigate("/verf");
       
 
@@ -93,15 +98,20 @@ function Signup() {
       localStorage.setItem("token",res.token);
 
     } catch (error) {
+      
+      setLoading(false)
+      toast.error(error.message)
       if (
         error.response &&
         error.response.status >= 400 &&
         error.response.status <= 500
       ) {
+        toast.error(error.response.data.message)
         setError(error.response.data.message);
       }
     }
   };
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="realtive font-['Inter']">
@@ -399,6 +409,9 @@ function Signup() {
               >
                 Confimer
               </button>
+              {loading && <CircularProgress />}
+                    
+                    
             </div>
           </div>
         </div>

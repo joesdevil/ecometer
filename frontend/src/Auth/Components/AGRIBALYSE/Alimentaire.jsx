@@ -8,17 +8,17 @@ import {
   Paper,
   Dialog,
   DialogContent,
+  TextField,
   FormControl,
   FormLabel,
   RadioGroup,
-  FormControlLabel,
   Radio,
-  TextField,
+  FormControlLabel,
+  
 } from "@mui/material";
-import CroixIcon from "./CroixIcon";
+import CroixIcon from "../CroixIcon";
 import { toast } from 'react-toastify';
 import {  CircularProgress } from "@mui/material";
-
 
 const Styles = {
   contenuEtape: {
@@ -135,36 +135,24 @@ const Styles = {
   },
 };
 
-function ProduitsVendu() {
-  const [produitsVendusList, setproduitsVendusList] = useState([
+function Alimentaire() {
+  const [emissionsList, setEmissionsList] = useState([
     {
-      label: "Utilisation des produits vendus",
-      ind: 17,
-      dialogOptions: [{ label: "Achats de biens", value: "Achats de biens" }],
+      label: "émissions de produits alimentaire",
+      ind: 22,
+      dialogueOptions: [{ label: "Produits alimentaires", value: "Produits alimentaires" }],
       selectedOptions: [],
     },
     {
-      label: "Actifs en leasing aval",
-      ind: 18,
-      dialogOptions: [{ label: "Achats de biens", value: "Achats de biens" }],
+      label: "émissions de produits agricoles",
+      ind: 22,
+      dialogueOptions: [{ label: "Produits agricoles", value: "Agricultural" }],
       selectedOptions: [],
     },
-    {
-      label: "Fin de vie des produits vendus",
-      ind: 19,
-      dialogOptions: [
-        { label: "Traitement des déchets", value: "Traitement des déchets" },
-      ],
-      selectedOptions: [],
-    },
-    {
-      label: "Investissements",
-      ind: 20,
-      dialogOptions: [
-        { label: "Achats de service", value: "Achats de services" },
-      ],
-      selectedOptions: [],
-    },
+
+    
+    
+  
   ]);
   const [selectedEmissionIndex, setSelectedEmissionIndex] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -176,6 +164,9 @@ function ProduitsVendu() {
   const [category3, setCategory3] = useState("");
   const [nextLevelCategories, setnextLevelCategories] = useState([]);
   const [nextLevelCategories2, setnextLevelCategories2] = useState([]);
+  const [nextLevelCategories3, setnextLevelCategories3] = useState([]);
+  const [nextLevelCategories4, setnextLevelCategories4] = useState([]);
+  
   const [fe, setFe] = useState();
   const handleCategory2 = async (event) => {
     try {
@@ -201,6 +192,8 @@ function ProduitsVendu() {
       console.log(err);
     }
   };
+
+
   const handleCategory3 = async (event) => {
     try {
       setCategory2(event.target.value);
@@ -224,18 +217,66 @@ function ProduitsVendu() {
       console.log(err);
     }
   };
+
+  const handleCategory4 = async (event) => {
+    try {
+      setCategory2(event.target.value);
+      setLoading(true)
+      const url = "http://localhost:3000/api/categories/nextCategories";
+      const { data: res } = await axios.post(url, {
+        userSelectedCategories: [category1, event.target.value],
+      });
+      setLoading(false)
+      setnextLevelCategories3(res.nextCategories);
+      setData([category1, category2]);
+    } catch (error) {
+      setLoading(false)
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        setError(error.response.data.message);
+      }
+      console.log(err);
+    }
+  };
+
+  const handleCategory5 = async (event) => {
+    try {
+      setCategory2(event.target.value);
+      setLoading(true)
+      const url = "http://localhost:3000/api/categories/nextCategories";
+      const { data: res } = await axios.post(url, {
+        userSelectedCategories: [category1, event.target.value],
+      });
+      setLoading(false)
+      setnextLevelCategories4(res.nextCategories);
+      setData([category1, category2]);
+    } catch (error) {
+      setLoading(false)
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        setError(error.response.data.message);
+      }
+      console.log(err);
+    }
+  };
   const handleFe = async (event) => {
     try {
-      setCategory3(event.target.value);
       setLoading(true)
+      setCategory3(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, category2, event.target.value],
       });
       setLoading(false)
       setFe(res.matchingDocuments); 
-      setData([category1, category2, category3]); 
-      
+      setData([category1, category2, category3]);
+     
     } catch (error) {
       setLoading(false)
       if (
@@ -261,22 +302,22 @@ function ProduitsVendu() {
     setIdElment(idElment);
   };
   const handleValider = () => {
-    const updatedEmissionsList = [...produitsVendusList];
+    const updatedEmissionsList = [...emissionsList];
     updatedEmissionsList[selectedEmissionIndex].selectedOptions.push(
       ...selectedOptions
     );
-    setproduitsVendusList(updatedEmissionsList);
+    setEmissionsList(updatedEmissionsList);
     setSelectedOptions([]);
     setOpenDialog(false);
     setFe();
   };
   const SupprimerSelectedOption = (optionToRemove) => {
-    const updatedEmissionsList = [...produitsVendusList];
+    const updatedEmissionsList = [...emissionsList];
     updatedEmissionsList[selectedEmissionIndex].selectedOptions =
       updatedEmissionsList[selectedEmissionIndex].selectedOptions.filter(
         (option) => option !== optionToRemove
       );
-    setproduitsVendusList(updatedEmissionsList);
+    setEmissionsList(updatedEmissionsList);
   };
   const [indice, setIndice] = useState();
   const [idElment, setIdElment] = useState();
@@ -296,7 +337,7 @@ function ProduitsVendu() {
   const [loading, setLoading] = useState(false);
   return (
     <div>
-      {produitsVendusList.map((produit, index) => (
+      {emissionsList.map((produit, index) => (
         <Box key={index} p={2} bgcolor={"#F0F2F7"} mb={2} borderRadius={4}>
           <Grid container justifyContent="space-between" alignItems="center">
             <Grid item xs={12} md={9}>
@@ -320,6 +361,7 @@ function ProduitsVendu() {
                 produit.selectedOptions.length > 0 && (
                   <Grid style={{ marginTop: "15px" }}>
                     {produit.selectedOptions.map((option, optionIndex) => (
+                       
                       <Grid
                         key={optionIndex}
                         container
@@ -331,6 +373,7 @@ function ProduitsVendu() {
                           borderColor: "#6F6C8F",
                         }}
                       >
+                        
                         <Grid item md={12}>
                           <Grid container>
                             <Grid
@@ -363,10 +406,10 @@ function ProduitsVendu() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                Quantité :
+                                 {option.split(",")[1].split("/")[1]?"Quantité " + option.split(",")[1].split("/")[1] + ":":"Quantité en kg"}
                               </Typography>
                             </Grid>
-
+                            { option.split(",")[3]=="ratio de charge" ? 
                             <Grid item xs={12} md={10.4}>
                               <TextField
                                 type="number"
@@ -400,6 +443,116 @@ function ProduitsVendu() {
                                 save
                               </Button>
                             </Grid>
+                            :
+                            <Grid item xs={12} md={10.4}>
+                            <TextField
+                              type="number"
+                              variant="outlined"
+                              fullWidth
+                              sx={{
+                                borderRadius: "15px",
+                                mt: 1,
+                                mb: 2,
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#969696 !important", // Couleur de la bordure
+                                  borderRadius: "15px",
+                                },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                  borderRadius: "15px",
+                                },
+                                "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                  {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                    borderRadius: "15px",
+                                  },
+                              }}
+                              onChange={handleChange}
+                            />
+                            <Button
+                              variant="contained"
+                              href="#contained-buttons"
+                              onClick={handleSave}
+                            >
+                              save
+                            </Button>
+                          </Grid>
+
+                              }
+                           { option.split(",")[3]=="taux de fuite annuel" && 
+                            <Grid item xs={12} md={10.4}>
+                              depuis quelle années tu l'as:
+                              <TextField
+                                type="number"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  borderRadius: "15px",
+                                  mt: 1,
+                                  mb: 2,
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure
+                                    borderRadius: "15px",
+                                  },
+                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                    borderRadius: "15px",
+                                  },
+                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                    {
+                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                      borderRadius: "15px",
+                                    },
+                                }}
+                                onChange={handleChange}
+                              />
+                              <Button
+                                variant="contained"
+                                href="#contained-buttons"
+                                onClick={handleSave}
+                              >
+                                save
+                              </Button>
+                            </Grid>
+
+                              }
+                              { option.split(",")[3]=="taux de fuite en fin de vie" && 
+                            <Grid item xs={12} md={10.4}>
+                              déjà jeté (si oui, en quelle année) ?:
+                              <TextField
+                                type="number"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  borderRadius: "15px",
+                                  mt: 1,
+                                  mb: 2,
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure
+                                    borderRadius: "15px",
+                                  },
+                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                    borderRadius: "15px",
+                                  },
+                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                    {
+                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                      borderRadius: "15px",
+                                    },
+                                }}
+                                onChange={handleChange}
+                              />
+                              <Button
+                                variant="contained"
+                                href="#contained-buttons"
+                                onClick={handleSave}
+                              >
+                                save
+                              </Button>
+                            </Grid>
+
+                              }
                           </Grid>
                         </Grid>
                       </Grid>
@@ -436,7 +589,7 @@ function ProduitsVendu() {
                   <option disabled selected>
                     Selectionner une catégorie
                   </option>
-                  {produitsVendusList[selectedEmissionIndex].dialogOptions.map(
+                  {emissionsList[selectedEmissionIndex].dialogueOptions.map(
                     (option, index) => (
                       <option key={index} value={option.value}>
                         {option.label}
@@ -448,7 +601,7 @@ function ProduitsVendu() {
             )}
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-                Catégorie 2
+              Groupe d'aliment
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -464,9 +617,48 @@ function ProduitsVendu() {
                 ))}
               </select>
             </Grid>
+
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-                Catégorie 3
+              Materiau d'emballage
+              </Typography>
+              <select
+                style={{ ...Styles.customSelect, width: "100%" }}
+                onChange={handleCategory4}
+              >
+                <option disabled selected>
+                  Selectionner une catégorie
+                </option>
+                {nextLevelCategories2.map((index) => (
+                  <option key={index} value={index}>
+                    {index}
+                  </option>
+                ))}
+              </select>
+            </Grid>
+
+            <Grid item xs={12} md={12}>
+              <Typography variant="h6" style={Styles.customTitle}>
+              Preparation
+              </Typography>
+              <select
+                style={{ ...Styles.customSelect, width: "100%" }}
+                onChange={handleCategory5}
+              >
+                <option disabled selected>
+                  Selectionner une catégorie
+                </option>
+                {nextLevelCategories3.map((index) => (
+                  <option key={index} value={index}>
+                    {index}
+                  </option>
+                ))}
+              </select>
+            </Grid>
+
+            <Grid item xs={12} md={12}>
+              <Typography variant="h6" style={Styles.customTitle}>
+                Livraison
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -475,7 +667,7 @@ function ProduitsVendu() {
                 <option disabled selected>
                   Selectionner une catégorie
                 </option>
-                {nextLevelCategories2.map((index) => (
+                {nextLevelCategories4.map((index) => (
                   <option key={index} value={index}>
                     {index}
                   </option>
@@ -521,25 +713,28 @@ function ProduitsVendu() {
                     {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
-                         
-                            const displayName = item.name || item["Nom base français"];
-                            const unity= item.unity || item["Unité français"]
-                            const idEle = item.id || item["Identifiant de l'élément"]
-                              return (
-                                <FormControlLabel
-                                  key={index}
-                                  value={item._id} // Adjust this value as needed
-                                  control={<Radio />} // Using Radio component here
-                                  label={
-                                    displayName +
-                                    "," +
-                                    unity +
-                                    ", " +
-                                    idEle
-                                  } // Adjust this label as needed
-                                />
-                              );
-                           // Skip rendering if condition doesn't match
+                        
+                        const displayName =  item["Nom du Produit Equivalent en Algerie "] || item["Nom du Produit en Francais"];
+                        const unity= item.unity || "kg CO2 eq/kg"
+                        const tags  =  item["Sous-groupe d'aliment"]|| ""
+                          
+                          
+                           
+                            return (
+                              <FormControlLabel
+                                key={index}
+                                value={item._id} // Adjust this value as needed
+                                control={<Radio />} // Using Radio component here
+                                label={
+                                  displayName +
+                                  " , " +
+                                  unity +
+                                  " , " + tags
+                                } // Adjust this label as needed
+                              />
+                            );
+                          
+                          
                         })}
                   </RadioGroup>
                 </FormControl>
@@ -576,4 +771,4 @@ function ProduitsVendu() {
   );
 }
 
-export default ProduitsVendu;
+export default Alimentaire;

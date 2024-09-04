@@ -18,7 +18,27 @@ const usedElements = new mongoose.Schema({
   },
 });
 // Define schema for emission posts
-const emissionPostSchema = new mongoose.Schema({
+const emissionPostSchemaAdeme = new mongoose.Schema({
+  index: Number,
+  category: String,
+  postName: String,
+  scope: String,
+  uncertainty: { type: Number, default: 0 },
+  emissions: { type: Number, default: 0 }, // Default value is 0 for emissions
+  // other gasses (CH4, N2O, CO2) default is "NC/0" (non calculé)
+  CO2: { type: Number, default: 0 },
+  CH4: { type: Number, default: 0 },
+  N2O: { type: Number, default: 0 },
+  CO2f: { type: Number, default: 0 },
+  CH4b: { type: Number, default: 0 },
+  CH4f: { type: Number, default: 0 },
+  categoryElements: {
+    type: [usedElements],
+    default: [], // default value is an empty array , the model depends on the category
+  },
+});
+
+const emissionPostSchemaAgribalyse = new mongoose.Schema({
   index: Number,
   category: String,
   postName: String,
@@ -39,9 +59,18 @@ const emissionPostSchema = new mongoose.Schema({
 });
 
 // Define schema for carbon footprint document
-const carbonFootprintSchema = new mongoose.Schema({
+const carbonFootprintSchemaAdeme = new mongoose.Schema({
   clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
-  emissionPosts: [emissionPostSchema],
+  emissionPosts: [emissionPostSchemaAdeme],
+  totalUncertainty: { type: Number, default: 0 },
+  year: { type: Number, default: currentYear },
+  totalEmissions: { type: Number, default: 0 }, // Default value is 0 for total emissions
+  createdAt: { type: Date, default: Date.now }, // Default value is the current date and time
+});
+
+const carbonFootprintSchemaAgribalyse=new mongoose.Schema({
+  clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
+  emissionPosts: [emissionPostSchemaAdeme],
   totalUncertainty: { type: Number, default: 0 },
   year: { type: Number, default: currentYear },
   totalEmissions: { type: Number, default: 0 }, // Default value is 0 for total emissions
@@ -56,10 +85,20 @@ bilansConnection.once("open", function () {
 });
 
 // Create model for carbon footprint
-const CarbonFootprint = bilansConnection.model(
+const CarbonFootprintAdeme = bilansConnection.model(
   "CarbonFootprint",
-  carbonFootprintSchema,
+  carbonFootprintSchemaAdeme,
+  "carbonFootprints"
+); 
+
+const CarbonFootprintAgribalyse = bilansConnection.model(
+  "CarbonFootprint",
+  carbonFootprintSchemaAgribalyse,
   "carbonFootprints"
 );
 
-module.exports = CarbonFootprint;
+
+module.exports = {
+  CarbonFootprintAdeme,
+  CarbonFootprintAgribalyse
+};

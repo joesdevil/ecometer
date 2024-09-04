@@ -5,6 +5,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios"; // Import axios
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { toast } from 'react-toastify';
 
 // Définir un nouveau thème personnalisé
 const newTheme = createTheme({
@@ -110,9 +112,11 @@ function Bilan({ showBilan, setShowBilan }) {
       [],
       [], //21
       [], //22
+      [], //23
     ],
   };
   const handleClick = () => {
+    localStorage.setItem("db_type", selectedDb);
     localStorage.removeItem("Bilan");
     localStorage.setItem("Bilan", JSON.stringify(data));
     setShowBilan(!showBilan); // Inversion de l'état de showBilan
@@ -124,7 +128,9 @@ function Bilan({ showBilan, setShowBilan }) {
     const file = event.target.files[0];
     const formData = new FormData();
     formData.append('excelfile', file);
-    console.log("uploading file")
+    
+   
+    
     setLoading(true)
     try {
       const response = await axios.post('http://localhost:3000/api/categories/uploadExcelToMongo', formData, {
@@ -132,18 +138,25 @@ function Bilan({ showBilan, setShowBilan }) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log('File uploaded successfully:', response.data);
+      toast.success('File uploaded successfully' );
       setLoading(false)
+      const files = Array.from(event.target.files); // Convert FileList to array
+      console.log("originalname",file.name)
+      setUploadedFiles((prevFiles) => [...prevFiles, ...files.map(file => file.name)]);
+      
     } catch (error) {
-      console.error("Error uploading file:", error);
+      toast.error("Error uploading file" );
       setLoading(false);
     }
   };
   const pays = [{ id: 1, name: "Algerie" }];
   const wilayas = ["Alger", "Oran", "Tizi Ouzou"];
+  const dbs_type = ["AGRIBALYSE","ADEME", ];
   const [selectedPays, setSelectedPays] = useState("");
   const [selectedWilaya, setSelectedWilaya] = useState("");
+  const [selectedDb, setSelectedDb] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadedfiles, setUploadedFiles] = useState([]);
   return (
     <div>
       <ThemeProvider theme={newTheme}>
@@ -276,7 +289,43 @@ function Bilan({ showBilan, setShowBilan }) {
               </Grid>
             </Grid>
 
+            <Grid item md={12} xs={12}>
+              <Grid container spacing={2}>
+                <Grid item md={4.2} xs={12}>
+                  <Typography style={Styles.bodyText}>Base de donnée</Typography>
+                  <Select
+                    fullWidth
+                    sx={{
+                      borderRadius: "15px",
 
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FC !important",
+                        borderRadius: "15px",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FC !important",
+                        borderRadius: "15px",
+                      },
+                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#EEF5FCD !important",
+                        borderRadius: "15px",
+                      },
+                    }}
+                    value={selectedDb}
+                    onChange={(e) => setSelectedDb(e.target.value)}
+                  >
+                    <option disabled selected>
+                      Selectionner DB type
+                    </option>
+                    {dbs_type.map((db_type) => (
+                      <option key={db_type} value={db_type}>
+                        {db_type}
+                      </option>
+                    ))}
+                  </Select>
+                </Grid>
+              </Grid>
+            </Grid>
 
             <Grid item md={12} xs={12}>
               <Grid container spacing={2}>
@@ -306,6 +355,27 @@ function Bilan({ showBilan, setShowBilan }) {
               </Grid>
             </Grid>
             
+
+            
+            
+            <Grid item md={12} xs={12}>
+              <Grid container spacing={2}>
+                <Grid item md={4.2} xs={12}>
+                {uploadedfiles.length > 0 && (
+                    <>
+                      <Typography style={{ color: "green" }}>uploaded db files:</Typography>
+                      <ul>
+                        {uploadedfiles.map((item, index) => (
+                          <li key={index}><InsertDriveFileIcon style={{ marginRight: 8, color:"green" }} /> {item}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                                  
+                   
+                </Grid>
+              </Grid>
+            </Grid>
             
             <Grid item md={12} xs={12}>
               <Grid container direction="row-reverse">
@@ -329,6 +399,5 @@ function Bilan({ showBilan, setShowBilan }) {
 }
 
 export default Bilan;
-
 
 

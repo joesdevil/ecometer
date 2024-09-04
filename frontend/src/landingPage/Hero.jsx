@@ -1,6 +1,6 @@
 function Hero() {
   return (
-    <section className="bg-slate-900 w-[100%] h-[90vh] relative">
+    <section className="bg-slate-90 w-[100%] h-[90vh] relative">
       <img
         className="absolute  w-[100%] max-w-full bottom-0"
         src="/Vector1.svg"
@@ -48,13 +48,13 @@ Sans']  text-[white] text-[9.5vh] font-bold  "
             <div className="  text-[white] text-base w-[100%] mt-[5vh] ">
               <a
                 href="/signup"
-                className="no-underline bg-[#D62828] text-[white] text-[2.8vh] cursor-pointer  duration-[0.3s]   hover:bg-[#e32b2b] hover:rounded-[1.8vh]   px-[5vh] py-[2.5vh] rounded-[2vh] border-[none] "
+                className="no-underline bg-[#D62828] text-[white] text-[2.8vh] cursor-pointer  duration-[0.3s]   hover:bg-[#e32b2b] hover:rounded-[1.2vh]   px-[3vh] py-[1.5vh] rounded-[1.7vh] border-[none] "
               >
                 S’inscrire
               </a>
               <a
                 href="/login"
-                className=" no-underline bg-[#0F172A] text-[white] text-[2.8vh] cursor-pointer transition-all duration-[0.3s] ease-[ease] delay-[0s]   hover:bg-[#121c36] hover:rounded-[1.8vh]   border ml-[2vh] px-[5vh] py-[2.5vh] rounded-[2vh] border-[none] border-solid border-white "
+                className=" no-underline bg-[#0F172A] text-[white] text-[2.8vh] cursor-pointer transition-all duration-[0.3s] ease-[ease] delay-[0s]   hover:bg-[#121c36] hover:rounded-[1.2vh]   border ml-[2vh] px-[3vh] py-[1.5vh] rounded-[1.7vh] border-[none] border-solid border-white "
               >
                 Se connecter
               </a>

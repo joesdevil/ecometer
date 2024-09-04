@@ -156,7 +156,10 @@ const loginClient = async (req, res) => {
       isAdmin: isAdmin
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error s:", error);
+
+    console.log(error.contains("MongoNetworkError"))
+
     return res.status(500).json({ error: "Internal error" });
   }
 };

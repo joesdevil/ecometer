@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import CroixIcon from "./CroixIcon";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
 
 const Styles = {
   contenuEtape: {
@@ -152,6 +154,7 @@ function Energie() {
       ],
       selectedOptions: [],
     },
+     
   ]);
   const [selectedEmissionIndex, setSelectedEmissionIndex] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -167,15 +170,17 @@ function Energie() {
   const handleCategory2 = async (event) => {
     try {
       setCategory1(event.target.value);
+      setLoading(true)
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories(res.nextCategories);
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 4 ",res.matchingDocuments)
+      setFe(res.matchingDocuments); 
       setData([category1]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -188,14 +193,18 @@ function Energie() {
   };
   const handleCategory3 = async (event) => {
     try {
+      setLoading(true)
       setCategory2(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories2(res.nextCategories);
       setData([category1, category2]);
+      
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -208,17 +217,17 @@ function Energie() {
   };
   const handleFe = async (event) => {
     try {
+      setLoading(true)
       setCategory3(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, category2, event.target.value],
       });
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 8 ",res.matchingDocuments)
-      setData([category1, category2, category3]);
-      console.log(fe);
-      console.log(data);
+      setLoading(false)
+      setFe(res.matchingDocuments); 
+      setData([category1, category2, category3]); 
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -274,6 +283,7 @@ function Energie() {
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }
     localStorage.setItem("Bilan", JSON.stringify(bilan));
   };
+  const [loading, setLoading] = useState(false);
   return (
     <div>
       {energieList.map((produit, index) => (
@@ -343,7 +353,7 @@ function Energie() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                Quantité :
+                              {option.split(",")[1].split("/")[1]?"Quantité " + option.split(",")[1].split("/")[1] + ":":""}
                               </Typography>
                             </Grid>
 
@@ -405,6 +415,7 @@ function Energie() {
             sx={{ paddingLeft: "16px", paddingRight: "16px" }}
           >
             {selectedEmissionIndex !== null && (
+              
               <Grid item xs={12} md={12}>
                 <Typography variant="h6" style={Styles.customTitle}>
                   Catégorie 1
@@ -417,7 +428,9 @@ function Energie() {
                     Selectionner une catégorie
                   </option>
                   {energieList[selectedEmissionIndex].dialogOptions.map(
+                    
                     (option, index) => (
+                       
                       <option key={index} value={option.value}>
                         {option.label}
                       </option>
@@ -498,25 +511,42 @@ function Energie() {
                       )
                     }
                   >
+                    {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
                           
-                            const displayName = item["Nom base français"] ||  item.name;
+                            const displayName = item["Nom base français"]  ;
                           const unity= item.unity || item["Unité français"]
                           const idEle = item.id || item["Identifiant de l'élément"]
+                          const nameAttr=item["Nom attribut français"]
+                          const tags=item["Tags français"]
+                          const type=item["Type Ligne"]
+                          let country = item["Sous-localisation géographique français"]
+                          
+                          if(!country){
+                            country=""
+                          }
                             return (
+                               type== "Elément" &&
+                              (
+                              
                               <FormControlLabel
                                 key={index}
                                 value={item._id} // Adjust this value as needed
                                 control={<Radio />} // Using Radio component here
                                 label={
+                                  country + "- " +
                                   displayName +
-                                  "," +
+                                  ", " +
                                   unity +
                                   ", " +
-                                  idEle
+                                  nameAttr +
+                                  
+                                  ", " +
+                                 
+                                  tags
                                 } // Adjust this label as needed
-                              />
+                              />)
                             ); 
                         })}
                   </RadioGroup>

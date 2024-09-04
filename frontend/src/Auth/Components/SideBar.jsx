@@ -78,7 +78,7 @@ const SideBar = () => {
             button
             selected={location.pathname === "/"}
             style={listItemStyle}
-            onClick={() => handleListItemClick("/")}
+            onClick={() => handleListItemClick("/acceuil")}
           >
             <ListItemIcon style={{ color: "#fff" }}>
               <AccueilIcon />

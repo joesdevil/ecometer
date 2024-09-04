@@ -6,13 +6,20 @@ const {
   Combustibles,
   ProcessEtEmissionFugitives,
   Electricite,
+  ElectriciteParPays,
   ReseauxDeChaleurEtFroid,
   StatistiquesTerritoriales,
   TraitementDesDechets,
   TransportDeMarchandises,
   TransportDePersonnes,
   UTCF,
+  Produitsalimentaires,
+  Produitsagricoles,
+  Produitsagricoles1 ,
   categoriesConnection,
+  categoriesConnection2 
+  // agribalyse 
+ 
 } = require("../Models/Category");
 
 // maincategories should be as the first category for each activity by default
@@ -28,6 +35,12 @@ const mainCategories = [
   "Transport de marchandises",
   "Transport de personnes",
   "UTCF",
+
+  
+  // agribalyse
+  "Produits Alimentaires",
+  "Produitsagricoles1",
+  "Produitsagricoles"
 ];
 
 // Function to get the next level categories and matching documents
@@ -87,6 +100,9 @@ async function getNextLevelCategories(userSelectedCategories) {
     case "Electricité":
       Model = categoriesConnection.model("Electricite");
       break;
+    case "Electricité":
+      Model = categoriesConnection.model("ElectriciteParPays");
+      break;
     case "Processetémissionsfugitives":
       Model = categoriesConnection.model("ProcessEtEmissionFugitives");
       break;
@@ -108,7 +124,25 @@ async function getNextLevelCategories(userSelectedCategories) {
     case "UTCF":
       Model = categoriesConnection.model("UTCF");
       break;
+    // agribalyse
+    case "Produitsalimentaires":
+      Model = categoriesConnection2.model("Produitsalimentaires");
+      break;
+    
+    case "Produitsagricoles1":
+      console.log("sal1")
+      Model = categoriesConnection2.model("Produitsagricoles1");
+      break;
+      
+    case "Agricultural":
+      console.log("sal")
+      Model = categoriesConnection2.model("Produitsagricoles");
+      break;
+      
+
+
     default:
+      
       existingCategory = false;
       return {
         nextLevelCategories: [],
@@ -118,13 +152,16 @@ async function getNextLevelCategories(userSelectedCategories) {
   }
 
   // Query MongoDB using Mongoose to find next level categories
+ 
+
   const matchingDocuments = await Model.find({
     categories: { $all: userSelectedCategories },
   });
-
+ 
   console.log("matchingDocuments",matchingDocuments)
   // Extract next level categories from matching documents
   matchingDocuments.forEach((doc) => { 
+    console.log("doc.categories",doc)
     const nextCategoryIndex = doc.categories.indexOf(userSelectedCategories[userSelectedCategories.length-1]) + 1;
     console.log("nextCategoryIndex",nextCategoryIndex)
     if (doc.categories[nextCategoryIndex]) {
@@ -148,10 +185,13 @@ const app = express();
 // Configure Multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/');  // Save to the 'uploads' directory
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    // Preserve the original file name and ensure the extension is included
+    const extension = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, extension);
+    cb(null, `${baseName}${extension}`);  // Set the file name to the original name with the correct extension
   }
 });
 

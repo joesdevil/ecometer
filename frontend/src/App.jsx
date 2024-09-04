@@ -13,6 +13,8 @@ import Utilisateurs from "./admin/pages/Utilisateurs.jsx";
 import Basededonnees from "./admin/pages/Basededonnees.jsx";
 import ModifierCollection from "./admin/pages/ModifierCollection.jsx";
 import "./App.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +50,7 @@ const RequireAuth = ({ children }) => {
 function App() {
   return (
     <>
+     <ToastContainer />
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider theme={theme}>

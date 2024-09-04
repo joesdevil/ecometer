@@ -16,6 +16,9 @@ import {
   TextField,
 } from "@mui/material";
 import CroixIcon from "./CroixIcon";
+import { toast } from 'react-toastify';
+import {  CircularProgress } from "@mui/material";
+
 const Styles = {
   contenuEtape: {
     fontSize: "18px",
@@ -185,15 +188,17 @@ function ProduitsAchetes() {
   const handleCategory2 = async (event) => {
     try {
       setCategory1(event.target.value);
+      setLoading(true)
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories(res.nextCategories);
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 1",res.matchingDocuments)
+      setFe(res.matchingDocuments); 
       setData([category1]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -206,14 +211,17 @@ function ProduitsAchetes() {
   };
   const handleCategory3 = async (event) => {
     try {
+      setLoading(true)
       setCategory2(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, event.target.value],
       });
+      setLoading(false)
       setnextLevelCategories2(res.nextCategories);
       setData([category1, category2]);
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -226,17 +234,17 @@ function ProduitsAchetes() {
   };
   const handleFe = async (event) => {
     try {
+      setLoading(true)
       setCategory3(event.target.value);
       const url = "http://localhost:3000/api/categories/nextCategories";
       const { data: res } = await axios.post(url, {
         userSelectedCategories: [category1, category2, event.target.value],
       });
-      setFe(res.matchingDocuments);
-      console.log("res.matchingDocuments 7 ",res.matchingDocuments)
-      setData([category1, category2, category3]);
-      console.log(fe);
-      console.log(data);
+      setLoading(false)
+      setFe(res.matchingDocuments); 
+      setData([category1, category2, category3]); 
     } catch (error) {
+      setLoading(false)
       if (
         error.response &&
         error.response.status >= 400 &&
@@ -255,9 +263,14 @@ function ProduitsAchetes() {
   const handleClose = () => {
     setOpenDialog(false);
   };
-  const handleCheckboxChange = async (optionLabel, idElment) => {
+  const handleCheckboxChange = async (optionLabel, idElment,idElmentEvite) => {
     setSelectedOptions((prevOptions) => [...prevOptions, optionLabel]);
     setIdElment(idElment);
+    if(indice==14){
+      console.log("idd",idElmentEvite)
+      setIdElmentevite(idElmentEvite)
+    }
+    
   };
   const handleValider = () => {
     const updatedEmissionsList = [...produitsAchetesList];
@@ -279,13 +292,38 @@ function ProduitsAchetes() {
   };
   const [indice, setIndice] = useState();
   const [idElment, setIdElment] = useState();
+  
   const [Quantité, setQuantité] = useState(0);
+
+  const [idElmentevite, setIdElmentevite] = useState();
+  
+  const [Quantitérec, setQuantitérec] = useState(0);
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  // Toggle the checkbox state
+  const handleCheckboxChange1 = () => {
+    setIsChecked(!isChecked);
+  };
+
   const handleChange = (e) => {
     setQuantité(Number(e.target.value)); //
+  };
+
+  const handleChangerec = (e) => {
+    setQuantitérec(Number(e.target.value)); //
   };
   const handleSave = async () => {
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("bilan", bilan);
+    console.log("bilan.selectedCategoryElements[indice]",bilan.selectedCategoryElements[indice])
+    if(indice==14){
+      bilan.selectedCategoryElements[indice].push({
+        quantity: Quantitérec,
+        categoryElement: idElment,
+        type: "evité",
+      }); 
+    }
     bilan.selectedCategoryElements[indice].push({
       quantity: Quantité,
       categoryElement: idElment,
@@ -293,6 +331,7 @@ function ProduitsAchetes() {
     localStorage.setItem("Bilan", JSON.stringify(bilan));
 
   };
+  const [loading, setLoading] = useState(false);
   return (
     <div>
       {produitsAchetesList.map((produit, index) => (
@@ -319,6 +358,7 @@ function ProduitsAchetes() {
                 produit.selectedOptions.length > 0 && (
                   <Grid style={{ marginTop: "15px" }}>
                     {produit.selectedOptions.map((option, optionIndex) => (
+                    
                       <Grid
                         key={optionIndex}
                         container
@@ -362,7 +402,7 @@ function ProduitsAchetes() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                Quantité :
+                              {"Combien " + option.split(",")[1].split("/")[1] + " :"}
                               </Typography>
                             </Grid>
 
@@ -391,6 +431,54 @@ function ProduitsAchetes() {
                                 }}
                                 onChange={handleChange}
                               />
+                              
+                           
+                          
+
+                              
+                            </Grid>
+                                {produit.ind == 14? (  <Grid item xs={12} md={10.4}>
+                            <div>
+                              <span>est ce que vous avez recupérer une Quantité:</span>
+                            <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={handleCheckboxChange1}
+                          />
+
+                            </div>
+                            
+                            {isChecked && (
+                                                <TextField
+                                                type="number"
+                                                placeholder="quantité recupérer"
+                                                variant="outlined"
+                                                fullWidth
+                                                sx={{
+                                                  borderRadius: "15px",
+                                                  mt: 1,
+                                                  mb: 2,
+                                                  "& .MuiOutlinedInput-notchedOutline": {
+                                                    borderColor: "#969696 !important", // Couleur de la bordure
+                                                    borderRadius: "15px",
+                                                  },
+                                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                                    borderRadius: "15px",
+                                                  },
+                                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                                    {
+                                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                                      borderRadius: "15px",
+                                                    },
+                                                }}
+                                                onChange={handleChangerec}
+                                                />
+                            )}
+                           
+                             
+
+                              </Grid>): ""}
                               <Button
                                 variant="contained"
                                 href="#contained-buttons"
@@ -398,7 +486,10 @@ function ProduitsAchetes() {
                               >
                                 save
                               </Button>
-                            </Grid>
+                          
+
+                              
+                            
                           </Grid>
                         </Grid>
                       </Grid>
@@ -510,32 +601,44 @@ function ProduitsAchetes() {
                     aria-labelledby="demo-radio-buttons-group-label"
                     defaultValue={""} // Assuming selectedOption is the state for the selected radio button
                     name="radio-buttons-group"
-                    onChange={(event) =>
+                    onChange={(event) => 
+                       
                       handleCheckboxChange(
                         event.target.labels[0].innerText,
-                        event.target.value
+                        event.target.value,
+                        event.target.key,
                       )
                     }
                   >
+                    {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
                           
-                            const displayName = item.name || item["Nom base français"];
+                            const displayName = item["Nom base français"];
                           const unity= item.unity || item["Unité français"]
                           const idEle = item.id || item["Identifiant de l'élément"]
+                          const type=item["Type Ligne"]
+                          const nameAttr=item["Nom attribut français"]
+                          const tags=item["Tags français"]
                             return (
-                              <FormControlLabel
-                                key={index}
-                                value={item._id} // Adjust this value as needed
+                              type== "Elément" &&
+                              (<FormControlLabel
+                                value={item._id}
+                                
+                                key={item["Emissions évitées"] ? item["Emissions évitées"] : item._id} // Adjust this value as needed
                                 control={<Radio />} // Using Radio component here
                                 label={
                                   displayName +
+                                  
                                   "," +
                                   unity +
+                                  "," +
+                                  nameAttr+
+                                 
                                   ", " +
-                                  idEle
+                                  tags 
                                 } // Adjust this label as needed
-                              />
+                              />)
                             );
                             // Skip rendering if condition doesn't match
                         })}

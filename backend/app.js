@@ -40,9 +40,8 @@ app.use("/api/objectifs/", verifyClientToken, objectifRoutes);
 
 
 // Start the server
-app.listen(serverConfig.port, () => {
+app.listen(serverConfig.port, '0.0.0.0', () => {
   console.log(`Server is running on port ${serverConfig.port}`);
 });
-
 
 
