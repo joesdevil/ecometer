@@ -12,6 +12,12 @@ import CartOff from '../icons/CartOff';
 import BatteryOff from '../icons/BatteryOff';
 import OtherOff from '../icons/OtherOff';
 import BagOff from '../icons/BagOff';
+import Calc from '../icons/Calc';
+import Display from '../icons/Display';
+import Chev from '../icons/Chev';
+import Steps from '../icons/Steps';
+
+
 function ColorlibStepIcon(props) {
     const { active, completed, className } = props;
 
@@ -24,6 +30,10 @@ function ColorlibStepIcon(props) {
      4: iconColor ? <Bag /> : <BagOff />,
      5: iconColor ? <Cart /> : <CartOff />,
      6: iconColor ? <Other /> : <OtherOff />,
+     7: iconColor ? <Calc /> : <Calc />,
+     8: iconColor ? <Display /> : <Display />,
+     9: iconColor ? <Steps /> : <Steps />,
+     99: iconColor ? <Chev /> : <Chev />,
    };
 
     return (

@@ -253,19 +253,19 @@ function Calculateur() {
 }
 
   const steps = {
-    "ADEME":[
-      { label: "Emissions directes", icon: 1, backgroundColor: "#F0F2F7" },
-      { label: "Energie", icon: 2, backgroundColor: "#E0E5EC" },
-      { label: "Déplacement", icon: 3, backgroundColor: "#D1D9E4" },
-      { label: "Produits Achetés", icon: 4, backgroundColor: "#C1CDE0" },
-      { label: "Produits Vendus", icon: 5, backgroundColor: "#C1CDE0" },
+    "ademe":[
+      { label: "Emissions directes", icon: 99, backgroundColor: "#F0F2F7" },
+      { label: "Energie", icon: 99, backgroundColor: "#E0E5EC" },
+      { label: "Déplacement", icon: 99, backgroundColor: "#D1D9E4" },
+      { label: "Produits Achetés", icon: 99, backgroundColor: "#C1CDE0" },
+      { label: "Produits Vendus", icon: 99, backgroundColor: "#C1CDE0" },
       {
         label: "Autres émissions indirectes",
         icon: 6,
         backgroundColor: "#B2C8DC",
       },
     ],
-    "AGRIBALYSE":[
+    "Agribalyse":[
       { label: "produits et agricoles", icon: 4, backgroundColor: "#C1CDE0" },
       
     ]
@@ -378,45 +378,45 @@ function Calculateur() {
                         }}
                       >
                          
-                        {activeStep === 0 && selectedDB=="ADEME" && (
+                        {activeStep === 0 && selectedDB=="ademe" && (
                           <EmissionsDirectes
                             emissionsList={emissionsList}
                             setEmissionsList={setEmissionsList}
                           />
                         )}
 
-                        {activeStep === 0 && selectedDB=="AGRIBALYSE" && (
+                        {activeStep === 0 && selectedDB=="Agribalyse" && (
                           <Alimentaire
                             emissionsList={emissionsListAgribalyse}
                             setEmissionsList={setEmissionsListAgribalyse}
                           />
                         )}
 
-                        {activeStep === 1 && selectedDB=="ADEME" && (
+                        {activeStep === 1 && selectedDB=="ademe" && (
                           <Energie
                             energieList={energieList}
                             setEnergieList={setEnergieList}
                           />
                         )}
-                        {activeStep === 2  && selectedDB=="ADEME" && (
+                        {activeStep === 2  && selectedDB=="ademe" && (
                           <Deplacement
                             deplacementList={deplacementList}
                             setDeplacementList={setDeplacementList}
                           />
                         )}
-                        {activeStep === 3 && selectedDB=="ADEME" && (
+                        {activeStep === 3 && selectedDB=="ademe" && (
                           <ProduitsAchetes
                             produitsAchetesList={produitsAchetesList}
                             setProduitsAchetesList={setProduitsAchetesList}
                           />
                         )}
-                        {activeStep === 4 && selectedDB=="ADEME" && (
+                        {activeStep === 4 && selectedDB=="ademe" && (
                           <ProduitsVendu
                             produitsVendusList={produitsVendusList}
                             setProduitsVendusList={setProduitsVendusList}
                           />
                         )}
-                        {activeStep === 5 && selectedDB=="ADEME" && <AutresEmissions />}
+                        {activeStep === 5 && selectedDB=="ademe" && <AutresEmissions />}
                       </Grid>
 
                       <Grid item xs={12} md={10} sx={{ marginTop: "30px" }}>

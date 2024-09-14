@@ -9,6 +9,34 @@ const Schema = mongoose.Schema;
 
 //define CategorySchema
 
+const ModelElementSchema = new Schema({
+  display: {   
+    type: Object,
+    required: [true, 'display field is required']
+  },
+  dbName: {  // Replaces IdentifiantElement
+    type: String,
+  },
+  methode: {
+    type: Object,
+    required: [true, 'Methode field is required']
+  },
+
+  headers: {
+    type: Object,
+    required: [true, 'headers field is required']
+  },
+  
+  steps:{
+    type: Object,
+    required: [true, 'headers field is required']
+  }
+  
+
+
+
+});
+
 const CategoryElementSchema = new Schema({
     elementType: {  // Replaces TypeLigne
       type: String,
@@ -98,113 +126,50 @@ const CategoryElementSchema = new Schema({
       type: String,
       default: null
     },
+
+    "Emissions évitées":{  // Replaces TotalPosteNonDecompose
+      type: Number,
+      required: [false, 'totalPostValue field is required']
+    },
     // 
   });
 
-const schemacategory2 = new Schema({
-    db_type: {  // Replaces Type Poste
-      type: String,
-      default: null,
-    },
-    // agribalyse
+const CategoryElementSchema2 = new Schema({
+  db_type: {  // Replaces Type Poste
+    type: String,
+    default: null,
+  },
+  // agribalyse
+
+  "Identifiant de l'élément":{  // Replaces Type Poste
+    type: Number,
+    default: null,
+  },
+
+
+  name:{  // Replaces Type Poste
+    type: String,
+    default: null,
+  },
+
+  categories: {  // Replaces separate Category fields
+    type: [String],
+  },
+
+  "Code de la catégorie": {  // Replaces separate Category fields
+    type: [String],
+  },
+  
+  "Total poste non décomposé":{  // Replaces Type Poste
+    type: Number,
+    default: null,
+  },
     
-CodeAGB:{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-CodeCIQUAL:{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-"Groupe d'aliment":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-"Sous-groupe d'aliment":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-
-"Nom du Produit en Francais":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-"Nom du Produit Equivalent en Algerie ":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-
-"code saison (0 : hors saison ; 1 : de saison ; 2 : mix de consommation FR)":{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-
-"code avion (1 : par avion)":{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-
-Livraison:{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-
-"Materiau d'emballage":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-Preparation:{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-
-"DQR - Note de qualité de la donnée (1 excellente ; 5 très faible)" :{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-
-"kg CO2 eq/kg":{  // Replaces Type Poste
-  type: Number,
-  default: null,
-},
-categories: {  // Replaces separate Category fields
-  type: [String],
-},
-
-
 
   })
 
 
-  const schemacategory3 = new Schema({
-    db_type: {  // Replaces Type Poste
-      type: String,
-      default: null,
-    },
-    // agribalyse
  
-"Nom du Produit en Francais":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-"kg CO2 eq/kg":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
-
-"Catégorie":{  // Replaces Type Poste
-  type: String,
-  default: null,
-},
- 
-   
-categories: {  // Replaces separate Category fields
-  type: [String],
-},
-
-
-
-  })
   // Define a pre-save middleware to parse and convert the last five fields to floating-point numbers
 CategoryElementSchema.pre('save', function(next) {
   const lastFields = ['totalPostValue', 'co2', 'ch4', 'ch4b', 'n2o'];
@@ -220,7 +185,7 @@ CategoryElementSchema.pre('save', function(next) {
 });
 
 
-schemacategory2.pre('save', function(next) {
+CategoryElementSchema2.pre('save', function(next) {
   const lastFields = ['totalPostValue', 'co2', 'ch4', 'ch4b', 'n2o'];
   for (const field of lastFields) {
       if (typeof this[field] === 'string') {
@@ -232,24 +197,11 @@ schemacategory2.pre('save', function(next) {
   }
   next();
 });
-
-schemacategory3.pre('save', function(next) {
-  const lastFields = ['totalPostValue', 'co2', 'ch4', 'ch4b', 'n2o'];
-  for (const field of lastFields) {
-      if (typeof this[field] === 'string') {
-          const floatValue = parseFloat(this[field]);
-          if (!isNaN(floatValue)) {
-              this[field] = floatValue;
-          }
-      }
-  }
-  next();
-});
+ 
 
   
 const categoriesConnection = mongoose.createConnection(process.env.CATEGORIES_URL);
-const categoriesConnection2 = mongoose.createConnection(process.env.CATEGORIES_URL);
-const categoriesConnection3 = mongoose.createConnection(process.env.CATEGORIES_URL);
+const categoriesConnection2 = mongoose.createConnection(process.env.CATEGORIES_URL); 
 
 // Add error handling
 categoriesConnection.on('error', console.error.bind(console, 'connection error:'));
@@ -262,11 +214,10 @@ categoriesConnection2.once('open', function() {
   console.log("Connected to Categories 2 database");
 });
 
-categoriesConnection3.on('error', console.error.bind(console, 'connection error:'));
-categoriesConnection3.once('open', function() {
-  console.log("Connected to Categories 3 database");
-});
+ 
 //create models
+
+const ModelDB = categoriesConnection.model('ModelDB', ModelElementSchema, 'ModelDB');
 
 const AchatsDeBiens = categoriesConnection.model('AchatsDeBiens', CategoryElementSchema, 'achatsdebiens');
 
@@ -292,9 +243,8 @@ const ElectriciteParPays = categoriesConnection.model('ElectriciteParPays', Cate
 const UTCF = categoriesConnection.model('UTCF', CategoryElementSchema, 'utcf');
 
 // agribalyse
-const Produitsalimentaires = categoriesConnection2.model('Produitsalimentaires', schemacategory2, 'produitsalimentaires');
-const Produitsagricoles = categoriesConnection3.model('Produitsagricoles', schemacategory3, 'produitsagricoles');
-const Produitsagricoles1 = categoriesConnection3.model('Produitsagricoles1', schemacategory3, 'produitsagricoles1');
+const Produitsalimentaires = categoriesConnection2.model('Produitsalimentaires', CategoryElementSchema2, 'produitsalimentaires');
+const Produitsagricoles = categoriesConnection2.model('Produitsagricoles', CategoryElementSchema2, 'produitsagricoles'); 
 
 
 
@@ -313,10 +263,8 @@ module.exports = {
     TransportDePersonnes,
     UTCF,
     Produitsalimentaires,
-    Produitsagricoles,
-    Produitsagricoles1,
-
+    Produitsagricoles, 
+    ModelDB,
     categoriesConnection,
-    categoriesConnection2,
-    categoriesConnection3
+    categoriesConnection2, 
 };

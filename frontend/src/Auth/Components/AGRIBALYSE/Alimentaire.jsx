@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import {
   Box,
@@ -145,8 +145,8 @@ function Alimentaire() {
     },
     {
       label: "émissions de produits agricoles",
-      ind: 22,
-      dialogueOptions: [{ label: "Produits agricoles", value: "Agricultural" }],
+      ind: 23,
+      dialogueOptions: [{ label: "Produits agricoles", value: "Produits agricoles" }],
       selectedOptions: [],
     },
 
@@ -335,6 +335,31 @@ function Alimentaire() {
     localStorage.setItem("Bilan", JSON.stringify(bilan));
   };
   const [loading, setLoading] = useState(false);
+
+  const [dbs_type, setDbs_type] = useState({})
+
+  useEffect(() => {
+    // Define the async function to fetch data
+    const fetchHeaders = async () => {
+      try {
+        // Replace with your API endpoint
+        const name=localStorage.getItem("db_type")
+        const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
+        console.log("test",response.data)
+        setDbs_type(response.data); 
+        
+      } catch (err) {
+        console.log('Failed to fetch headers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call the function
+    fetchHeaders();
+     
+  }, []);
+
   return (
     <div>
       {emissionsList.map((produit, index) => (
@@ -601,7 +626,7 @@ function Alimentaire() {
             )}
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-              Groupe d'aliment
+              Categorie 2
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -620,7 +645,7 @@ function Alimentaire() {
 
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-              Materiau d'emballage
+              Categorie 3
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -639,7 +664,7 @@ function Alimentaire() {
 
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-              Preparation
+              Categorie 4
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -658,7 +683,7 @@ function Alimentaire() {
 
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
-                Livraison
+              Categorie 5
               </Typography>
               <select
                 style={{ ...Styles.customSelect, width: "100%" }}
@@ -714,11 +739,10 @@ function Alimentaire() {
                     {fe &&
                       fe.map((item, index) => {
                         
-                        const displayName =  item["Nom du Produit Equivalent en Algerie "] || item["Nom du Produit en Francais"];
-                        const unity= item.unity || "kg CO2 eq/kg"
-                        const tags  =  item["Sous-groupe d'aliment"]|| ""
+                       
                           
-                          
+                                
+                        console.log("ite,",item.categories[0])
                            
                             return (
                               <FormControlLabel
@@ -726,11 +750,12 @@ function Alimentaire() {
                                 value={item._id} // Adjust this value as needed
                                 control={<Radio />} // Using Radio component here
                                 label={
-                                  displayName +
-                                  " , " +
-                                  unity +
-                                  " , " + tags
-                                } // Adjust this label as needed
+                                  Array.isArray(dbs_type["display"][item.categories[0]]) ? // Check if dbs_type["display"] is an array
+                                  dbs_type["display"][item.categories[0]]
+                                      .map((db) => item[db]) // Map over dbs_type["display"] to get the values
+                                      .join(" , ") // Join the mapped array into a single string
+                                  : "Invalid Display Type" // Fallback if display is not an array
+                                }
                               />
                             );
                           

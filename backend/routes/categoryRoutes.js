@@ -1,5 +1,5 @@
 const express = require("express");
-const { getCategoryElements, uploadExcelToMongo } = require("../controllers/category");
+const { getCategoryElements, uploadExcelToMongo,createModelDb,getModelDb,updateModelDb,getModelsDb ,getModelDbByName} = require("../controllers/category");
 const mongoose = require("mongoose");
 const multer = require('multer'); 
 const path = require('path');
@@ -22,5 +22,9 @@ const upload = multer({ storage: storage });
 
 router.post("/nextCategories", getCategoryElements);
 router.post("/uploadExcelToMongo",upload.single('excelfile'), uploadExcelToMongo);
-
+router.post("/model/create", createModelDb);
+router.get("/models/get", getModelsDb);
+router.get("/model/get_by_name/:name", getModelDbByName);
+router.get("/model/get_by_id/:id", getModelDb);
+router.put("/model/update/:id", updateModelDb);
 module.exports = router;

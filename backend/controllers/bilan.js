@@ -1,4 +1,4 @@
-const {CarbonFootprintAdeme,CarbonFootprintAgribalyse} = require("../Models/Bilan");
+const {CarbonFootprintADEM,CarbonFootprintAgribalyse} = require("../Models/Bilan");
 const {
   AchatsDeBiens,
   AchatsDeServices,
@@ -12,7 +12,6 @@ const {
   TransportDeMarchandises,
   TransportDePersonnes,
   UTCF,
-  Produitsagricoles1,
   Produitsagricoles,
   Produitsalimentaires,
   categoriesConnection,
@@ -37,7 +36,7 @@ const createBilan = async (req, res) => {
       postEmissions[i] = newAtt;
       i++;
     });
-    const newCarbonFootprint = db_type=="Ademe"? new CarbonFootprintAdeme({
+    const newCarbonFootprint = db_type=="ADEM"? new CarbonFootprintADEM({
       clientId,
       emissionPosts: postEmissions,
     }) :  new CarbonFootprintAgribalyse({
@@ -52,7 +51,7 @@ const createBilan = async (req, res) => {
   }
 };
 
-let db_type="ADEME"
+let db_type="ADEM"
 // update and calculate bilan
 const updateAndCalculateBilan = async (req, res) => {
    
@@ -69,7 +68,7 @@ const updateAndCalculateBilan = async (req, res) => {
   
     console.log("db_type",db_type)
   
-    const carbonFootprint = db_type=="Ademe"?await CarbonFootprintAdeme.findOne({ clientId, year }): await CarbonFootprintAgribalyse.findOne({ clientId, year }) ;
+    const carbonFootprint = db_type=="ADEM"?await CarbonFootprintADEM.findOne({ clientId, year }): await CarbonFootprintAgribalyse.findOne({ clientId, year }) ;
     console.log("carbonFootprint",carbonFootprint)
     if (!carbonFootprint) {
       return res.status(404).json({ msg: "Bilan not found" });
@@ -79,7 +78,8 @@ const updateAndCalculateBilan = async (req, res) => {
       if (categoryElements.length > 0) {
         
        
-        console.log("carbonFootprint",carbonFootprint)
+        console.log("carbonFootprint.emissionPosts[i].category",carbonFootprint.emissionPosts[i])
+        console.log("categoryElements",categoryElements)
 
         const { emissions, weightedAverageUncertainty, CO2 ,CH4 , N2O ,CO2f,CH4f,CH4b } =
           await calculateEmissionsPost(
@@ -141,9 +141,12 @@ let CO2 = 0;
   let CO2f= 0;
   let CH4f= 0;
   let CH4b= 0;
-
+  let uncertaintyPercentage =0;
+  let emissions = 0;
 //calculate the emissions for a single post Emission
 const calculateEmissionsPost = async (category, categoryElements) => {
+  console.log("enter function category",category)
+  console.log("enter function categoryElements",categoryElements)
   let emissions = 0;
   let totalValueTimesUncertainty = 0;
   let totalValue = 0;
@@ -152,12 +155,25 @@ const calculateEmissionsPost = async (category, categoryElements) => {
   let Model;
   console.log("db_type",db_type)
 
-  db_type=="ADEME"?Model = categoriesConnection.model(category): Model = categoriesConnection2.model(category);
-  
+  db_type=="ADEM"?Model = categoriesConnection.model(category): Model = categoriesConnection2.model(category);
+  console.log("category",category)
   for (const [index,element] of categoryElements.entries()) {
+   
      
       console.log("element.categoryElement",element.categoryElement)
+
     const categoryElement = await Model.findById(element.categoryElement);
+    try {
+      const incertNumber=categoryElement.Incertitude.replace("%","")
+       uncertaintyPercentage =
+        categoryElement.Incertitude !== null
+          ? parseFloat(incertNumber) / 100
+          : 0; 
+    } catch (error) {
+       uncertaintyPercentage =0;
+      const incertNumber=0
+    }
+    console.log("e categoryElement",categoryElement)
     // emissions += categoryElement.totalPostValue * element.quantity;
     let lastvalue=0
     let typeNamefrontiere=""
@@ -206,16 +222,7 @@ const calculateEmissionsPost = async (category, categoryElements) => {
          
     }
     
-    try {
-      const incertNumber=categoryElement.Incertitude.replace("%","")
-      const uncertaintyPercentage =
-        categoryElement.Incertitude !== null
-          ? parseFloat(incertNumber) / 100
-          : 0; 
-    } catch (error) {
-      const uncertaintyPercentage =0;
-      const incertNumber=0
-    }
+    
    
     
     let elemquantity=0;
@@ -223,8 +230,8 @@ const calculateEmissionsPost = async (category, categoryElements) => {
       let thisyear=new Date()
       thisyear=thisyear.getFullYear()
      
-      if(db_type=="ADEME"){
-        console.log("categoryElement ADEME",categoryElement)
+      if(db_type=="ADEM"){
+        console.log("categoryElement ADEM",categoryElement)
     
       switch (typeNamefrontiere) {
         case "taux de fuite annuel":
@@ -256,11 +263,15 @@ const calculateEmissionsPost = async (category, categoryElements) => {
             if(!element.quantity){
               element.quantity=0
             }
+            let emsevt=0
+            if(categoryElement["Emissions évitées"]){
+              emsevt=categoryElement["Emissions évitées"]
+            }
     
-            uncertainty =categoryElement["Emissions évitées"] * uncertaintyPercentage * element.quantity;
-            emissions += categoryElement["Emissions évitées"] * element.quantity;
+            uncertainty =emsevt * uncertaintyPercentage * element.quantity;
+            emissions += emsevt* element.quantity;
             totalValueTimesUncertainty += uncertainty;
-            totalValue += categoryElement["Emissions évitées"] * element.quantity;
+            totalValue += emsevt * element.quantity;
 
           }else{
             if(!element.quantity){
@@ -321,18 +332,14 @@ const calculateEmissionsPost = async (category, categoryElements) => {
       }
      
   }else if(db_type=="AGRIBALYSE"){
+    Model = categoriesConnection2.model(category)
+
     const categoryElement = await Model.findById(element.categoryElement);
-    try {
-      emissions += (categoryElement["kg CO2 eq/kg"]*element.quantity)/100;
-      totalValue +=(categoryElement["kg CO2 eq/kg"]* element.quantity )/100;
+  
+      emissions += (categoryElement["Total poste non décomposé"]*element.quantity)/100;
+      totalValue +=(categoryElement["Total poste non décomposé"]* element.quantity )/100;
       console.log("emissions",emissions)
-    } catch (error) {
-      console.log('category',category)
-     Model = categoriesConnection2.model(category);
-     emissions += (categoryElement["kg CO2 eq/kg"]*element.quantity)/100;
-     totalValue +=(categoryElement["kg CO2 eq/kg"]* element.quantity )/100;
-     console.log("emissions",emissions)
-    }
+    
   
     console.log("categoryElement agri",categoryElement)
         console.log("element.quantity",element.quantity)
@@ -403,7 +410,7 @@ const getBilan = async (req, res) => {
   }
   try {
     console.log("selected",selectedCategoryElements)
-    const carbonFootprint = db_type=="ADEME"?await CarbonFootprintAdeme.findOne({ clientId, year }):await CarbonFootprintAgribalyse.findOne({ clientId, year });
+    const carbonFootprint = db_type=="ADEM"?await CarbonFootprintADEM.findOne({ clientId, year }):await CarbonFootprintAgribalyse.findOne({ clientId, year });
     if (!carbonFootprint) {
       return res.status(404).json({ msg: "Bilan not found" });
     }
@@ -419,7 +426,7 @@ const getBilan = async (req, res) => {
 const getAllBilans = async (req, res) => {
   try {
     const clientId = req.clientId;
-    const carbonFootprints =  db_type=="ADEME"? await CarbonFootprintAdeme.find({ clientId: clientId }):await CarbonFootprintAgribalyse.findOne({ clientId, year });
+    const carbonFootprints =  db_type=="ADEM"? await CarbonFootprintADEM.find({ clientId: clientId }):await CarbonFootprintAgribalyse.findOne({ clientId: clientId  });
     return res.status(200).json({ carbonFootprints, clientId });
   } catch (error) {
     console.error("Error:", error);
@@ -435,7 +442,7 @@ const deleteBilan = async (req, res) => {
     return res.status(400).json({ msg: "Invalid client ID" });
   }
   try {
-    const carbonFootprint =db_type=="ADEME"?  await CarbonFootprintAdeme.findOneAndDelete({
+    const carbonFootprint =db_type=="ADEM"?  await CarbonFootprintADEM.findOneAndDelete({
       clientId,
       year,
     }) :await CarbonFootprintAgribalyse.findOneAndDelete({ clientId, year });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import axios from "axios";
 import {
   Box,
@@ -135,7 +135,32 @@ const Styles = {
   },
 };
 
+
 function EmissionsDirectes() {
+
+  const [dbs_type, setDbs_type] = useState({})
+  useEffect(() => {
+    // Define the async function to fetch data
+    const fetchHeaders = async () => {
+      try {
+        // Replace with your API endpoint
+        const name=localStorage.getItem("db_type")
+        const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
+        console.log("test",response.data)
+        setDbs_type(response.data); 
+        
+      } catch (err) {
+        console.log('Failed to fetch headers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call the function
+    fetchHeaders();
+     
+  }, []);
+
   const [emissionsList, setEmissionsList] = useState([
     {
       label: "émissions directes des sources fixes de combustion",
@@ -556,7 +581,7 @@ function EmissionsDirectes() {
                 <select
                   style={{ ...Styles.customSelect, width: "100%" }}
                   onChange={handleCategory2}
-                >
+                  >
                   <option disabled selected>
                     Selectionner une catégorie
                   </option>
@@ -645,39 +670,26 @@ function EmissionsDirectes() {
                     {loading && <CircularProgress />}
                     {fe &&
                       fe.map((item, index) => {
-                        
-                          const displayName =  item["Nom base français"] ;
-                          const unity= item.unity || item["Unité français"]
-                          const tags  =  item["Tags français"]
-                          let nomAttr= item["Nom attribut français"]
-                          let nomfrontiere=item["Nom frontière français"]
+                          
+                        console.log("ite,",item.categories[0])
+                       
 
-                          if(nomAttr=="NaN" || nomAttr=="null"){
-                             nomAttr=""
-                             
-                          }
-                          if(nomfrontiere=="NaN" || nomfrontiere=="null"){
-                            nomfrontiere=""
-                            
-                         }
+                          // dbs_type
                           
-                          
-                           
-                            return (
-                              <FormControlLabel
-                                key={index}
-                                value={item._id} // Adjust this value as needed
-                                control={<Radio />} // Using Radio component here
-                                label={
-                                  displayName +
-                                  " , " +
-                                  unity +
-                                  " , " +
-                                  nomAttr+ " , "
-                                  + nomfrontiere + ", "+ tags
-                                } // Adjust this label as needed
-                              />
-                            );
+                          return (
+                            <FormControlLabel
+                              key={index}
+                              value={item._id} // Assuming _id is unique for each item
+                              control={<Radio />} // Radio button component
+                              label={
+                                Array.isArray(dbs_type["display"][item.categories[0]]) ? // Check if dbs_type["display"] is an array
+                                dbs_type["display"][item.categories[0]]
+                                    .map((db) => item[db]) // Map over dbs_type["display"] to get the values
+                                    .join(" , ") // Join the mapped array into a single string
+                                : "Invalid Display Type" // Fallback if display is not an array
+                              }
+                            />
+                          );
                           
                           
                         })}

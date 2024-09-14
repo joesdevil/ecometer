@@ -11,7 +11,7 @@ const logging = require("./middleware/logging");
 const errorHandler = require("./middleware/errorHandler");
 const { verifyClientToken } = require("./middleware/auth");
 const bodyParser = require('body-parser');
-
+const path = require('path');
 
 const app = express();
 const cors = require("cors");
@@ -25,6 +25,7 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/static', express.static(path.join(__dirname, 'uploads')));
 app.use(cors());
 app.use(logging);
 app.use(errorHandler);
@@ -33,6 +34,7 @@ app.use("/api/admin/", adminRoutes);
 app.use("/api/Emission/", categoryRoutes);
 app.use("/api/categories/", categoryRoutes);
 app.use("/api/clients/", clientRouter);
+app.use("/api/modelDb/", categoryRoutes);
 app.use("/api/bilans/", verifyClientToken, bilanRoutes);
 app.use("/api/objectifs/", verifyClientToken, objectifRoutes);
 

@@ -6,6 +6,7 @@ import Login from "./logIn/Login";
 import Signup from "./signUp/Signup";
 import Calculateur from "./Auth/Pages/Calculateur.jsx";
 import Acceuil from "./Auth/Pages/Accueil.jsx";
+import UploadDB from "./Auth/Pages/UploadDB.jsx";
 import Rapport from "./Auth/Pages/Rapport.jsx";
 import Forgetpassword from "./logIn/Forgetpassword.jsx";
 import Verf from "./logIn/Verf.jsx";
@@ -68,6 +69,16 @@ function App() {
                   </RequireAuth>
                 }
               />
+
+              <Route
+                path="/uploadDB"
+                element={
+                  <RequireAuth>
+                    <UploadDB />
+                  </RequireAuth>
+                }
+              />
+
               <Route
                 path="/calculateur"
                 element={

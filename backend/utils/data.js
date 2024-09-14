@@ -132,19 +132,20 @@ const FixedPosteAttributs = [
     category: "AchatsDeServices",
     Scope: "3",
   },
-  
   {
-    index: "7.1",
-    postName: " émissions de produits alimentaires",
+    index: "6.1",
+    postName: "Produits alimentaires",
     category: "Produitsalimentaires",
-    Scope: "1",
+    Scope: "3",
   },
   {
-    index: "7.2",
-    postName: "émissions de produits agricoles",
+    index: "6.2",
+    postName: "Produits agricoles",
     category: "Produitsagricoles",
-    Scope: "1",
+    Scope: "3",
   },
+  
+
 ];
 const validCategories = [
   "AchatsDeBiens",
@@ -160,7 +161,6 @@ const validCategories = [
   "TransportDePersonnes",
   "UTCF",
   "Produitsagricoles",
-  "Produitsagricoles1",
   "Produitsalimentaires",
 ];
 module.exports = { FixedPosteAttributs , validCategories}

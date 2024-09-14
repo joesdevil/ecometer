@@ -13,7 +13,6 @@ const {
   TransportDeMarchandises,
   TransportDePersonnes,
   UTCF,
-  Produitsagricoles1,
   Produitsagricoles,
   Produitsalimentaires,
   categoriesConnection,

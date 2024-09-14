@@ -9,6 +9,8 @@ import {
 import AccueilIcon from "./AcceuilIcon";
 import CalculateurIcon from "./CalculateurIcon";
 import RapportIcon from "./RapportIcon";
+import UploadDBIcon from "./uploadDBIcon";
+import UploadIcon from "./uploadIcon";
 import ObjectifIcon from "./ObjectifIcon";
 import LogoutIcon from "./LogoutIcon";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -74,6 +76,7 @@ const SideBar = () => {
           Accès Rapide
         </Typography>
         <List component="nav" aria-label="icon list">
+
           <ListItem
             button
             selected={location.pathname === "/"}
@@ -85,6 +88,19 @@ const SideBar = () => {
             </ListItemIcon>
             <ListItemText primary="Accueil" style={listItemTextStyle} />
           </ListItem>
+
+          <ListItem
+            button
+            selected={location.pathname === "/uploadDb"}
+            style={listItemStyle}
+            onClick={() => handleListItemClick("/uploadDb")}
+          >
+            <ListItemIcon style={{ color: "#fff" }}>
+              <UploadIcon />
+            </ListItemIcon>
+            <ListItemText primary="Upload DB" style={listItemTextStyle} />
+          </ListItem>
+
           <ListItem
             button
             selected={location.pathname === "/calculateur"}
@@ -96,6 +112,7 @@ const SideBar = () => {
             </ListItemIcon>
             <ListItemText primary="Calculateur" style={listItemTextStyle} />
           </ListItem>
+
           <ListItem
             button
             selected={location.pathname === "/rapport"}
@@ -107,12 +124,15 @@ const SideBar = () => {
             </ListItemIcon>
             <ListItemText primary="Rapport" style={listItemTextStyle} />
           </ListItem>
+
+
           <ListItem button style={listItemStyle}>
             <ListItemIcon style={{ color: "#fff" }}>
               <ObjectifIcon />
             </ListItemIcon>
             <ListItemText primary="Objectifs" style={listItemTextStyle} />
           </ListItem>
+
         </List>
       </Grid>
       {/* ListItem "Déconnexion" */}
