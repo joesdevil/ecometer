@@ -136,9 +136,13 @@ const Styles = {
 };
 
 
-function EmissionsDirectes() {
+function EmissionsDirectes({step}) {
+
+
+  console.log("actttttt",step)
 
   const [dbs_type, setDbs_type] = useState({})
+  const [dbs_type1List,setDbs_type1List]=useState([])
   useEffect(() => {
     // Define the async function to fetch data
     const fetchHeaders = async () => {
@@ -148,6 +152,8 @@ function EmissionsDirectes() {
         const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
         console.log("test",response.data)
         setDbs_type(response.data); 
+        setEmissionsList(Object.values(response.data.steps)[0][step].list)
+        console.log("2nd step emmision",Object.values(response.data.steps)[0][step].list)
         
       } catch (err) {
         console.log('Failed to fetch headers');
@@ -161,48 +167,51 @@ function EmissionsDirectes() {
      
   }, []);
 
-  const [emissionsList, setEmissionsList] = useState([
-    {
-      label: "émissions directes des sources fixes de combustion",
-      ind: 0,
-      dialogueOptions: [{ label: "Combustibles", value: "Combustibles" }],
-      selectedOptions: [],
-    },
-    {
-      label: "émissions directes des sources mobiles de combustion",
-      ind: 1,
-      dialogueOptions: [{ label: "Combustibles", value: "Combustibles" }],
-      selectedOptions: [],
-    },
-    {
-      label: "émissions directes des procédés hors énergie",
-      ind: 2,
-      dialogueOptions: [
-        {
-          label: "Process et émissions fugitives",
-          value: "Process et émissions fugitives",
-        },
-      ],
-      selectedOptions: [],
-    },
-    {
-      label: "émissions directes fugitivess",
-      ind: 3,
-      dialogueOptions: [
-        {
-          label: "Process et émissions fugitives",
-          value: "Process et émissions fugitives",
-        },
-      ],
-      selectedOptions: [],
-    },
-    {
-      label: "émission issues de la biomasse (sols et forêts)",
-      ind: 4,
-      dialogueOptions: [{ label: "UTCF", value: "UTCF" }],
-      selectedOptions: [],
-    },
-  ]);
+
+  const [emissionsList, setEmissionsList] = useState([])
+
+  // const [emissionsList, setEmissionsList] = useState([
+  //   {
+  //     label: "émissions directes des sources fixes de combustion",
+  //     ind: 0,
+  //     dialogueOptions: [{ label: "Combustibles", value: "Combustibles" }],
+  //     selectedOptions: [],
+  //   },
+  //   {
+  //     label: "émissions directes des sources mobiles de combustion",
+  //     ind: 1,
+  //     dialogueOptions: [{ label: "Combustibles", value: "Combustibles" }],
+  //     selectedOptions: [],
+  //   },
+  //   {
+  //     label: "émissions directes des procédés hors énergie",
+  //     ind: 2,
+  //     dialogueOptions: [
+  //       {
+  //         label: "Process et émissions fugitives",
+  //         value: "Process et émissions fugitives",
+  //       },
+  //     ],
+  //     selectedOptions: [],
+  //   },
+  //   {
+  //     label: "émissions directes fugitivess",
+  //     ind: 3,
+  //     dialogueOptions: [
+  //       {
+  //         label: "Process et émissions fugitives",
+  //         value: "Process et émissions fugitives",
+  //       },
+  //     ],
+  //     selectedOptions: [],
+  //   },
+  //   {
+  //     label: "émission issues de la biomasse (sols et forêts)",
+  //     ind: 4,
+  //     dialogueOptions: [{ label: "UTCF", value: "UTCF" }],
+  //     selectedOptions: [],
+  //   },
+  // ]);
   const [selectedEmissionIndex, setSelectedEmissionIndex] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -402,7 +411,7 @@ function EmissionsDirectes() {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                 {option.split(",")[1].split("/")[1]?"Quantité " + option.split(",")[1].split("/")[1] + ":":""}
+                                 Quantité   {}
                               </Typography>
                             </Grid>
                             { option.split(",")[3]=="ratio de charge" ? 
@@ -671,7 +680,7 @@ function EmissionsDirectes() {
                     {fe &&
                       fe.map((item, index) => {
                           
-                        console.log("ite,",item.categories[0])
+                      
                        
 
                           // dbs_type

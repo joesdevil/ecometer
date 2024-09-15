@@ -136,6 +136,31 @@ const Styles = {
 };
 
 function Alimentaire() {
+
+  const [sheetsInfos,setSheetsInfos]=useState({})
+   
+  useEffect(() => {
+    // Define the async function to fetch data
+    const name = localStorage.getItem("db_type")
+    const fetchHeaders = async () => {
+      try {
+        // Replace with your API endpoint
+        const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
+        console.log("sleected000",Object.values(response.data.steps))
+        setSheetsInfos(response.data); 
+        
+      } catch (err) {
+        console.log('Failed to fetch headers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call the function
+    fetchHeaders();
+     
+  }, []);
+
   const [emissionsList, setEmissionsList] = useState([
     {
       label: "émissions de produits alimentaire",
@@ -154,6 +179,8 @@ function Alimentaire() {
     
   
   ]);
+
+
   const [selectedEmissionIndex, setSelectedEmissionIndex] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -338,27 +365,7 @@ function Alimentaire() {
 
   const [dbs_type, setDbs_type] = useState({})
 
-  useEffect(() => {
-    // Define the async function to fetch data
-    const fetchHeaders = async () => {
-      try {
-        // Replace with your API endpoint
-        const name=localStorage.getItem("db_type")
-        const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
-        console.log("test",response.data)
-        setDbs_type(response.data); 
-        
-      } catch (err) {
-        console.log('Failed to fetch headers');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Call the function
-    fetchHeaders();
-     
-  }, []);
+ 
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -88,6 +88,44 @@ const Styles = {
 };
 
 function Calculateur() {
+
+
+
+ 
+
+  const [dbs_type1,setDbs_type1]=useState([])
+  const [dbs_type1List,setDbs_type1List]=useState([])
+  const [steps,setSteps]=useState([])
+  useEffect(() => {
+    // Define the async function to fetch data
+    const fetchHeaders = async () => {
+      try {
+        // Replace with your API endpoint
+        const name=localStorage.getItem("db_type")
+        const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
+        console.log("sleected000",Object.values(response.data.steps)[0])
+        const transformedDbType = Object.values(response.data.steps)[0].map((hmm) => ({
+          label: hmm.label,
+        }));
+  
+       
+        console.log("transformedDbType",Object.values(response.data.steps))
+        setDbs_type1(Object.values(response.data.steps)); 
+        setSteps(transformedDbType); 
+        
+      } catch (err) {
+        console.log('Failed to fetch headers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call the function
+    fetchHeaders();
+     
+  }, []);
+
+
   const [showBilan, setShowBilan] = useState(false);
   const [emissionsListAgribalyse,setEmissionsListAgribalyse]=useState([
     {
@@ -252,29 +290,27 @@ function Calculateur() {
     return arrays.every(array => array.length === 0);
 }
 
-  const steps = {
-    "ademe":[
-      { label: "Emissions directes", icon: 99, backgroundColor: "#F0F2F7" },
-      { label: "Energie", icon: 99, backgroundColor: "#E0E5EC" },
-      { label: "Déplacement", icon: 99, backgroundColor: "#D1D9E4" },
-      { label: "Produits Achetés", icon: 99, backgroundColor: "#C1CDE0" },
-      { label: "Produits Vendus", icon: 99, backgroundColor: "#C1CDE0" },
-      {
-        label: "Autres émissions indirectes",
-        icon: 6,
-        backgroundColor: "#B2C8DC",
-      },
-    ],
-    "Agribalyse":[
-      { label: "produits et agricoles", icon: 4, backgroundColor: "#C1CDE0" },
-      
-    ]
-
-  }
+   
   const selectedDB= localStorage.getItem("db_type")
   console.log("selectedDB",selectedDB)
   
   const [loading, setLoading] = useState(false);
+
+   
+ 
+  useEffect(() => {
+    console.log("activeStep",activeStep)
+    
+
+    // Check if dbs_type1 has data and activeStep is valid
+    if (dbs_type1[0] && dbs_type1[0][activeStep]) {
+      console.log("2nd step calc ",dbs_type1[0][activeStep]["list"])
+      setDbs_type1(dbs_type1[0][activeStep]); // Update the state
+    }
+  }, [activeStep, dbs_type1, setDbs_type1List]); // Only re-run when activeStep changes
+
+
+
   return (
     <Grid container>
       <Grid
@@ -324,7 +360,7 @@ function Calculateur() {
                           gutterBottom
                           style={Styles.titreEtape}
                         >
-                          {steps[selectedDB][activeStep].label}
+                          {steps[activeStep].label}
                         </Typography>
                       </Grid>
 
@@ -334,12 +370,12 @@ function Calculateur() {
                           alternativeLabel
                           connector={<CustomStepConnector />}
                         >
-                          {steps[selectedDB].map((step, index) => (
+                          {steps.map((step, index) => (
                             <Step key={index}>
                               <StepLabel
                                 StepIconComponent={ColorlibStepIcon}
                                 sx={{ color: "#C92C39" }}
-                                icon={step.icon}
+                                icon={99}
                               ></StepLabel>
                             </Step>
                           ))}
@@ -378,20 +414,50 @@ function Calculateur() {
                         }}
                       >
                          
-                        {activeStep === 0 && selectedDB=="ademe" && (
+                        {/* {activeStep === 0 && selectedDB=="ademe" && (
+                          <EmissionsDirectes
+                            emissionsList={emissionsList}
+                            setEmissionsList={setEmissionsList}
+                          />
+                        )} */}
+
+                        {/* {activeStep === 0 && selectedDB=="Agribalyse" && (
+                          <Alimentaire
+                            emissionsList={emissionsListAgribalyse}
+                            setEmissionsList={setEmissionsListAgribalyse}
+                          />
+                        )} */}
+
+
+            
+                  
+
+
+{dbs_type1.list.map((step, index) => {
+        // Check if the current step is the active one
+        if (index === activeStep) {
+          return (
+            <div key={index}>
+              <EmissionsDirectes
+                emissionsList={dbs_type1List}
+                setEmissionsList={setDbs_type1List}
+                step={activeStep}
+              />
+            </div>
+          );
+        }
+        return null; // Return null if the condition isn't met
+      })}
+
+
+                                        
+{/* 
+                      {activeStep === 0 && selectedDB=="ademe" && (
                           <EmissionsDirectes
                             emissionsList={emissionsList}
                             setEmissionsList={setEmissionsList}
                           />
                         )}
-
-                        {activeStep === 0 && selectedDB=="Agribalyse" && (
-                          <Alimentaire
-                            emissionsList={emissionsListAgribalyse}
-                            setEmissionsList={setEmissionsListAgribalyse}
-                          />
-                        )}
-
                         {activeStep === 1 && selectedDB=="ademe" && (
                           <Energie
                             energieList={energieList}
@@ -416,7 +482,7 @@ function Calculateur() {
                             setProduitsVendusList={setProduitsVendusList}
                           />
                         )}
-                        {activeStep === 5 && selectedDB=="ademe" && <AutresEmissions />}
+                        {activeStep === 5 && selectedDB=="ademe" && <AutresEmissions />} */}
                       </Grid>
 
                       <Grid item xs={12} md={10} sx={{ marginTop: "30px" }}>
@@ -441,14 +507,14 @@ function Calculateur() {
               {loading && <CircularProgress />}
                           <Button
                             onClick={
-                              activeStep === steps[selectedDB].length - 1
+                              activeStep === steps.length - 1
                                 ? handleReset
                                 : handleNext
                             }
                             style={Styles.suivantButton}
                           >
                             <Typography style={Styles.buttonText}>
-                              {activeStep === steps[selectedDB].length - 1
+                              {activeStep === steps.length - 1
                                 ? "Calculer Bilan"
                                 : "Suivant"}
                             </Typography>

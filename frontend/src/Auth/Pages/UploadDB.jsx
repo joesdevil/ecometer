@@ -143,8 +143,10 @@ function Calculateur() {
  
   const finishModel = async ()=>{
 
-    // console.log("sheetSteps",sheetSteps)
+    console.log("sheetingos",sheetsInfos)
    
+
+    
 
   
 
@@ -153,7 +155,7 @@ function Calculateur() {
     };
  
     
-    console.log("sheetsInfos",sheetsInfos)
+     
     
     const url = `http://localhost:3000/api/ModelDB/model/update/${id}`;
      
@@ -306,10 +308,10 @@ function Calculateur() {
       };
     });
   };
-
+  
   const [sheetSteps, setSheetSteps] = useState({});
 
-  // Function to add a new step with a label for a given sheetName
+  // Function to add a new step with a label and an empty list for a given sheetName
   const handleAddStep = (sheetName) => {
     setSheetSteps((prevState) => {
       const currentSteps = prevState[sheetName] || [];
@@ -317,9 +319,44 @@ function Calculateur() {
         ...prevState,
         [sheetName]: [
           ...currentSteps,
-          { label: '', inputs: [] } // Each step has a label and an array of select-input pairs
-        ],
+          {
+            label: '',
+          
+            list: [] 
+          }
+        ]
       };
+    });
+  };
+
+  // Function to add a new object to the list in a specific step
+  const handleAddListItem = (sheetName, stepIndex) => {
+    setSheetSteps((prevState) => {
+      const updatedSteps = prevState[sheetName].map((step, index) => {
+        if (index === stepIndex) {
+          return {
+            ...step,
+            list: [
+              ...step.list,
+              {
+                label: '',
+                ind: step.list.length,
+                dialogueOptions:[ {
+                  label: '',
+                  value: ''
+                }], 
+                selectedOptions: []
+              }
+            ]
+          };
+        }
+        return step;
+      });
+      setSheetsInfos({
+        ...sheetsInfos,
+        steps: sheetSteps
+      });
+      return { ...prevState, [sheetName]: updatedSteps };
     });
   };
 
@@ -332,20 +369,6 @@ function Calculateur() {
         }
         return step;
       });
-      
-      return { ...prevState, [sheetName]: updatedSteps };
-    });
-  };
-
-  // Function to add a new select-input pair to a specific step in a sheetName
-  const handleAddInput = (sheetName, stepIndex) => {
-    setSheetSteps((prevState) => {
-      const updatedSteps = prevState[sheetName].map((step, index) => {
-        if (index === stepIndex) {
-          return { ...step, inputs: [...step.inputs, { selectValue: '', inputValue: '' }] };
-        }
-        return step;
-      });
       setSheetsInfos({
         ...sheetsInfos,
         steps: sheetSteps
@@ -354,29 +377,55 @@ function Calculateur() {
     });
   };
 
-  // Function to handle input and select changes within a step
-  const handleInputChange = (sheetName, stepIndex, inputIndex, field, value) => {
+  // Function to handle changes to the list item's label
+  const handleListItemLabelChange = (sheetName, stepIndex, itemIndex, value) => {
     setSheetSteps((prevState) => {
       const updatedSteps = prevState[sheetName].map((step, sIdx) => {
         if (sIdx === stepIndex) {
           return {
             ...step,
-            inputs: step.inputs.map((inputPair, idx) => {
-              if (idx === inputIndex) {
-                return { ...inputPair, [field]: value };
+            list: step.list.map((item, iIdx) => {
+              if (iIdx === itemIndex) {
+                return { ...item, label: value };
               }
-              return inputPair;
-            }),
+              return item;
+            })
           };
         }
         return step;
       });
-
       setSheetsInfos({
         ...sheetsInfos,
         steps: sheetSteps
       });
+      return { ...prevState, [sheetName]: updatedSteps };
+    });
+  };
 
+  // Function to handle changes to the selected options
+  const handleSelectedOptionsChange = (sheetName, stepIndex, itemIndex, value) => {
+    setSheetSteps((prevState) => {
+      const updatedSteps = prevState[sheetName].map((step, sIdx) => {
+        if (sIdx === stepIndex) {
+          return {
+            ...step,
+            list: step.list.map((item, iIdx) => {
+              if (iIdx === itemIndex) {
+                return {
+                  ...item,
+                  dialogueOptions: [ {label:value, value:value}]
+                };
+              }
+              return item;
+            })
+          };
+        }
+        setSheetsInfos({
+          ...sheetsInfos,
+          steps: sheetSteps
+        });
+        return step;
+      });
       return { ...prevState, [sheetName]: updatedSteps };
     });
   };
@@ -627,12 +676,12 @@ function Calculateur() {
 )}
 
 {activeStep === 2 && (
-                           <div>
-                       
+                          <div>
+                    
       {Object.keys(sheetsInfos.headers).length > 0 && (
         <div>
           <h1>Sheet Headers</h1>
-          {Object.entries(sheetsInfos.headers).map(([sheetName, headers]) => (
+          {Object.entries(sheetsInfos.headers).map(([sheetName]) => (
             <div key={sheetName}>
               <h2>{sheetName}</h2>
 
@@ -654,43 +703,58 @@ function Calculateur() {
                     required
                   />
 
-                  {/* Render dynamic select-input pairs within this step */}
-                  {step.inputs.map((inputPair, inputIndex) => (
-                    <div key={inputIndex}>
-                      <p>Select from Sheets:</p>
-                      <select
-                        value={inputPair.selectValue}
+                  {/* Render the list of objects in this step */}
+                  {step.list.map((listItem, itemIndex) => (
+                    <div key={itemIndex}>
+                      <h4>List Item {itemIndex + 1}</h4>
+
+                      {/* Input for List Item Label */}
+                      <input
+                        className="text-[2.6vh] border font-sans outline-none focus:border-none focus:outline-none"
+                        type="text"
+                        name="listItemLabel"
+                        placeholder="List Item Label"
+                        value={listItem.label}
                         onChange={(e) =>
-                          handleInputChange(sheetName, stepIndex, inputIndex, 'selectValue', e.target.value)
+                          handleListItemLabelChange(sheetName, stepIndex, itemIndex, e.target.value)
+                        }
+                        required
+                      />
+
+                      {/* Display all dialogue options */}
+                      <p>Dialogue Option:</p>
+                      <select
+                        value={listItem.dialogueOptions[0].value}
+                        onChange={(e) =>
+                          handleSelectedOptionsChange(sheetName, stepIndex, itemIndex, e.target.value)
                         }
                       >
-                        {Object.keys(sheetsInfos.headers).map((name, idx) => (
-                          <option key={idx} value={name}>
-                            {name}
+                        <option value="">Select an option</option>
+                        {Object.entries(sheetsInfos.headers).map(([sheetName1]) => (
+                          <option key={sheetName1} value={sheetName1}>
+                            {sheetName1}
                           </option>
                         ))}
                       </select>
 
-                      <input
-                        className="text-[2.6vh] border font-sans outline-none focus:border-none focus:outline-none"
-                        type="text"
-                        name="label"
-                        placeholder="label list"
-                        value={inputPair.inputValue}
-                        onChange={(e) =>
-                          handleInputChange(sheetName, stepIndex, inputIndex, 'inputValue', e.target.value)
-                        }
-                        required
-                      />
+                      {/* Render selected options */}
+                      <div>
+                        <h4>Selected Options:</h4>
+                        {listItem.selectedOptions.length > 0 ? (
+                          listItem.selectedOptions.map((opt, idx) => <p key={idx}>{opt}</p>)
+                        ) : (
+                          <p>No options selected yet</p>
+                        )}
+                      </div>
                     </div>
                   ))}
 
-                  {/* Button to add new select-input pair within this step */}
+                  {/* Button to add a new list item within this step */}
                   <button
                     type="button"
-                    onClick={() => handleAddInput(sheetName, stepIndex)}
+                    onClick={() => handleAddListItem(sheetName, stepIndex)}
                   >
-                    Add Select-Input Pair
+                    Add List Item
                   </button>
                 </div>
               ))}
@@ -706,7 +770,8 @@ function Calculateur() {
           ))}
         </div>
       )}
-                         </div>
+
+                        </div>
                      
                           )}
 
