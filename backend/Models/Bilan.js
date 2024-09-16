@@ -18,7 +18,7 @@ const usedElements = new mongoose.Schema({
   },
 });
 // Define schema for emission posts
-const emissionPostSchemaADEM = new mongoose.Schema({
+const emissionPostSchema = new mongoose.Schema({
   index: Number,
   category: String,
   postName: String,
@@ -26,56 +26,29 @@ const emissionPostSchemaADEM = new mongoose.Schema({
   uncertainty: { type: Number, default: 0 },
   emissions: { type: Number, default: 0 }, // Default value is 0 for emissions
   // other gasses (CH4, N2O, CO2) default is "NC/0" (non calculé)
-  CO2: { type: Number, default: 0 },
-  CH4: { type: Number, default: 0 },
-  N2O: { type: Number, default: 0 },
-  CO2f: { type: Number, default: 0 },
-  CH4b: { type: Number, default: 0 },
-  CH4f: { type: Number, default: 0 },
+  // CO2: { type: Number, default: 0 },
+  // CH4: { type: Number, default: 0 },
+  // N2O: { type: Number, default: 0 },
+  // CO2f: { type: Number, default: 0 },
+  // CH4b: { type: Number, default: 0 },
+  // CH4f: { type: Number, default: 0 },
   categoryElements: {
     type: [usedElements],
     default: [], // default value is an empty array , the model depends on the category
   },
 });
-
-const emissionPostSchemaAgribalyse = new mongoose.Schema({
-  index: Number,
-  category: String,
-  postName: String,
-  scope: String,
-  uncertainty: { type: Number, default: 0 },
-  emissions: { type: Number, default: 0 }, // Default value is 0 for emissions
-  // other gasses (CH4, N2O, CO2) default is "NC/0" (non calculé)
-  CO2: { type: Number, default: 0 },
-  CH4: { type: Number, default: 0 },
-  N2O: { type: Number, default: 0 },
-  CO2f: { type: Number, default: 0 },
-  CH4b: { type: Number, default: 0 },
-  CH4f: { type: Number, default: 0 },
-  categoryElements: {
-    type: [usedElements],
-    default: [], // default value is an empty array , the model depends on the category
-  },
-});
-
+ 
 // Define schema for carbon footprint document
-const carbonFootprintSchemaADEM = new mongoose.Schema({
+const carbonFootprintSchema = new mongoose.Schema({
   clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
-  emissionPosts: [emissionPostSchemaADEM],
+  emissionPosts: [emissionPostSchema],
   totalUncertainty: { type: Number, default: 0 },
   year: { type: Number, default: currentYear },
-  totalEmissions: { type: Number, default: 0 }, // Default value is 0 for total emissions
-  createdAt: { type: Date, default: Date.now }, // Default value is the current date and time
+  totalEmissions: { type: Number, default: 0 },  
+  createdAt: { type: Date, default: Date.now },  
 });
 
-const carbonFootprintSchemaAgribalyse=new mongoose.Schema({
-  clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
-  emissionPosts: [emissionPostSchemaADEM],
-  totalUncertainty: { type: Number, default: 0 },
-  year: { type: Number, default: currentYear },
-  totalEmissions: { type: Number, default: 0 }, // Default value is 0 for total emissions
-  createdAt: { type: Date, default: Date.now }, // Default value is the current date and time
-});
+ 
 
 const bilansConnection = mongoose.createConnection(process.env.BILANS_URL);
 // Add error handling
@@ -85,20 +58,14 @@ bilansConnection.once("open", function () {
 });
 
 // Create model for carbon footprint
-const CarbonFootprintADEM = bilansConnection.model(
+const CarbonFootprint = bilansConnection.model(
   "CarbonFootprint",
-  carbonFootprintSchemaADEM,
+  carbonFootprintSchema,
   "carbonFootprints"
 ); 
 
-const CarbonFootprintAgribalyse = bilansConnection.model(
-  "CarbonFootprint",
-  carbonFootprintSchemaAgribalyse,
-  "carbonFootprints"
-);
-
+ 
 
 module.exports = {
-  CarbonFootprintADEM,
-  CarbonFootprintAgribalyse
+  CarbonFootprint
 };

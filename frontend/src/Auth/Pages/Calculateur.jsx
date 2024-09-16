@@ -434,6 +434,7 @@ function Calculateur() {
 
 
 {dbs_type1.list.map((step, index) => {
+ 
         // Check if the current step is the active one
         if (index === activeStep) {
           return (
@@ -442,6 +443,7 @@ function Calculateur() {
                 emissionsList={dbs_type1List}
                 setEmissionsList={setDbs_type1List}
                 step={activeStep}
+                sheetNamem={step.dialogueOptions[0].value}
               />
             </div>
           );

@@ -122,7 +122,7 @@ const EnergieCard = () => {
                     marginRight: { md: "20px", xs: "10px" },
                   }}
                 >
-                  {((post1.total + post2.total) / 1000).toFixed(2)} tCO2e
+                  {((post1.total + post2.total) ).toFixed(3)} kg CO2e
                 </Typography>
               </Grid>
             </Grid>

@@ -299,6 +299,7 @@ function Deplacement() {
   const [indice, setIndice] = useState();
   const [idElment, setIdElment] = useState();
   const [Quantité, setQuantité] = useState(0);
+
   const handleChange = (e) => {
     setQuantité(Number(e.target.value)); //
   };
@@ -306,6 +307,7 @@ function Deplacement() {
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("bilan", bilan);
     bilan.selectedCategoryElements[indice].push({
+      
       quantity: Quantité,
       categoryElement: idElment,
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }

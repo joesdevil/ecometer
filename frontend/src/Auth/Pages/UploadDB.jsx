@@ -591,6 +591,14 @@ function Calculateur() {
             {sheetName === activeSheet && headers && headers.length > 0 ? (
               <>
                 <form>
+                <button
+                      className="border ml-2 mb-1"
+                      style={{ minWidth: '50px', padding: 5 }}
+                      key={"quantity"} // Use header if it's unique
+                      onClick={(event) => handleButtonClick1(event, "quantity")}
+                    >
+                     quantity
+                    </button>
                   {headers.map((header) => (
                     <button
                       className="border ml-2 mb-1"

@@ -1,4 +1,4 @@
-const {CarbonFootprintADEM,CarbonFootprintAgribalyse} = require("../Models/Bilan");
+const {CarbonFootprint} = require("../Models/Bilan");
 const {
   AchatsDeBiens,
   AchatsDeServices,
@@ -15,19 +15,73 @@ const {
   Produitsagricoles,
   Produitsalimentaires,
   categoriesConnection,
-  categoriesConnection2, 
+  categoriesConnection2,
+  ModelDB, 
 } = require("../Models/Category");
 const { unsubscribe } = require("../routes/categoryRoutes");
 const { FixedPosteAttributs } = require("../utils/data");
-const { isValidObjectId } = require("mongoose");
+const { isValidObjectId, Model } = require("mongoose");
+
+
+
+
+let dataToPush=[]
 
 const createBilan = async (req, res) => {
+
+
+ 
+  const modelattrs = await ModelDB.find({});
+  modelattrs.map((item) => {
+    console.log("steps mapped=> ",item)
+
+   
+      console.log("object keys",Object.keys(item.steps))
+      const CategoryCurrent=Object.keys(item.steps)[0].replaceAll(" ", "")
+      console.log("CategoryName",CategoryCurrent)
+
+      Object.keys(item.steps).map((category,x)=>{
+         console.log("==>",category)
+     
+         item.steps[category].map((list,y)=>{
+         
+          list.list.map((step,z)=>{
+
+            if(y !=0){
+              y=y+1
+            }
+            // console.log("y>",y)
+            // console.log("x>z>",(x+1)+"."+(z+1+y))
+            // const indexCurrent=((y+1)+(2*x))+"."+(z+1)
+            const indexCurrent=(x+1)+"."+(z+1+y)
+            const PostNameCurrent=step.label
+            const Scope= "1"
+            dataToPush.push({
+              index:indexCurrent,
+              category:CategoryCurrent,
+              postName:PostNameCurrent,
+              Scope: "1",
+            })
+            console.log("dataToPush=>>",dataToPush)
+          })
+        })
+
+      })
+
+    
+
+  })
+  
+
+
+
+
   const { clientId } = req.body;
   try {
     let postEmissions = [];
     let i = 0;
    
-    FixedPosteAttributs.map((att) => {
+    dataToPush.map((att) => {
       const newAtt = {
         ...att,
         emissions: 0,
@@ -36,13 +90,10 @@ const createBilan = async (req, res) => {
       postEmissions[i] = newAtt;
       i++;
     });
-    const newCarbonFootprint = db_type=="ADEM"? new CarbonFootprintADEM({
+    const newCarbonFootprint = new CarbonFootprint({
       clientId,
       emissionPosts: postEmissions,
-    }) :  new CarbonFootprintAgribalyse({
-      clientId,
-      emissionPosts: postEmissions,
-    }) ;
+    })  
     await newCarbonFootprint.save();
     return res.status(200).json(newCarbonFootprint);
   } catch (error) {
@@ -51,14 +102,14 @@ const createBilan = async (req, res) => {
   }
 };
 
-let db_type="ADEM"
+let db_type="ademe"
 // update and calculate bilan
 const updateAndCalculateBilan = async (req, res) => {
-   
+    
   if (req.params.db_type) {
     db_type = req.params.db_type;
   }
-  console.log("db_type",db_type)
+  console.log("bb",db_type)
   const { year, clientId, selectedCategoryElements } = req.body;
   console.log("req.body = ", req.body);
   console.log("db_type = ", db_type);
@@ -68,18 +119,17 @@ const updateAndCalculateBilan = async (req, res) => {
   
     console.log("db_type",db_type)
   
-    const carbonFootprint = db_type=="ADEM"?await CarbonFootprintADEM.findOne({ clientId, year }): await CarbonFootprintAgribalyse.findOne({ clientId, year }) ;
-    console.log("carbonFootprint",carbonFootprint)
-    if (!carbonFootprint) {
+    const carbonFootprint = await CarbonFootprint.findOne({ clientId, year });
+    // console.log("carbonFootprint",carbonFootprint)
+    if (!carbonFootprint) {screenXz
       return res.status(404).json({ msg: "Bilan not found" });
     }
     for (let i = 0; i < selectedCategoryElements.length; i++) {
-      const categoryElements = selectedCategoryElements[i];
-      if (categoryElements.length > 0) {
-        
+      console.log("check",selectedCategoryElements)
+
+      const categoryElements = selectedCategoryElements;
        
-        console.log("carbonFootprint.emissionPosts[i].category",carbonFootprint.emissionPosts[i])
-        console.log("categoryElements",categoryElements)
+        
 
         const { emissions, weightedAverageUncertainty, CO2 ,CH4 , N2O ,CO2f,CH4f,CH4b } =
           await calculateEmissionsPost(
@@ -121,7 +171,7 @@ const updateAndCalculateBilan = async (req, res) => {
         
         
        
-      }
+      
     }
 
     const { totalEmissions, totalWeightedAverageUncertainty } =
@@ -144,23 +194,30 @@ let CO2 = 0;
   let uncertaintyPercentage =0;
   let emissions = 0;
 //calculate the emissions for a single post Emission
+
+
+
 const calculateEmissionsPost = async (category, categoryElements) => {
-  console.log("enter function category",category)
-  console.log("enter function categoryElements",categoryElements)
+  // console.log("enter function category",category)
+  // console.log("enter function categoryElements",categoryElements)
   let emissions = 0;
   let totalValueTimesUncertainty = 0;
   let totalValue = 0;
   
   let i = 0; 
   let Model;
-  console.log("db_type",db_type)
+  console.log("db_type b",db_type)
 
-  db_type=="ADEM"?Model = categoriesConnection.model(category): Model = categoriesConnection2.model(category);
-  console.log("category",category)
+  try {
+    Model = categoriesConnection.model(category)
+  } catch (error) {
+    Model = categoriesConnection2.model(category)
+  }
+   
   for (const [index,element] of categoryElements.entries()) {
    
      
-      console.log("element.categoryElement",element.categoryElement)
+      // console.log("element.categoryElement",element.categoryElement)
 
     const categoryElement = await Model.findById(element.categoryElement);
     try {
@@ -173,7 +230,7 @@ const calculateEmissionsPost = async (category, categoryElements) => {
        uncertaintyPercentage =0;
       const incertNumber=0
     }
-    console.log("e categoryElement",categoryElement)
+    // console.log("e categoryElement",categoryElement)
     // emissions += categoryElement.totalPostValue * element.quantity;
     let lastvalue=0
     let typeNamefrontiere=""
@@ -195,32 +252,32 @@ const calculateEmissionsPost = async (category, categoryElements) => {
     
      
      
-    if(typeNamefrontiere!="ratio de charge"){
+    // if(typeNamefrontiere!="ratio de charge"){
        
-        for(var ii = 1; ii <categoryElements.length; ii++){
+    //     for(var ii = 1; ii <categoryElements.length; ii++){
           
-        try {
+    //     try {
 
            
-          const categoryElementcurrent = await Model.findById(categoryElements[index-ii].categoryElement);
+    //       const categoryElementcurrent = await Model.findById(categoryElements[index-ii].categoryElement);
           
           
-          if(categoryElementcurrent["Nom frontière français"] == "ratio de charge" || categoryElementcurrent["Nom attribut français"] == "ratio de charge"){
+    //       if(categoryElementcurrent["Nom frontière français"] == "ratio de charge" || categoryElementcurrent["Nom attribut français"] == "ratio de charge"){
 
-            lastvalue= categoryElements[index-ii].quantity * categoryElementcurrent["Total poste non décomposé"] 
-            console.log("calced")
-            break;
-           } 
+    //         lastvalue= categoryElements[index-ii].quantity * categoryElementcurrent["Total poste non décomposé"] 
+    //         console.log("calced")
+    //         break;
+    //        } 
           
           
           
-        } catch (error) {
-          console.log("..")
-          lastvalue=0
-        }
-      }
+    //     } catch (error) {
+    //       console.log("..")
+    //       lastvalue=0
+    //     }
+    //   }
          
-    }
+    // }
     
     
    
@@ -230,122 +287,147 @@ const calculateEmissionsPost = async (category, categoryElements) => {
       let thisyear=new Date()
       thisyear=thisyear.getFullYear()
      
-      if(db_type=="ADEM"){
-        console.log("categoryElement ADEM",categoryElement)
+      // if(db_type=="ADEM"){
+      //   console.log("categoryElement ADEM",categoryElement)
     
-      switch (typeNamefrontiere) {
-        case "taux de fuite annuel":
-          if(!element.quantity){
-            element.quantity=thisyear
-          }
-          elemquantity=(thisyear-element.quantity)
-          elemquantity==0?elemquantity=1:elemquantity=elemquantity; 
-          uncertainty =(categoryElement["Total poste non décomposé"] * uncertaintyPercentage  );
-          emissions += (categoryElement["Total poste non décomposé"]*elemquantity)/100;
-          totalValue +=(categoryElement["Total poste non décomposé"]* elemquantity )/100;
-          totalValueTimesUncertainty += uncertainty; 
-          break;
+      // switch (typeNamefrontiere) {
+      //   case "taux de fuite annuel":
+      //     if(!element.quantity){
+      //       element.quantity=thisyear
+      //     }
+      //     elemquantity=(thisyear-element.quantity)
+      //     elemquantity==0?elemquantity=1:elemquantity=elemquantity; 
+      //     uncertainty =(categoryElement["Total poste non décomposé"] * uncertaintyPercentage  );
+      //     emissions += (categoryElement["Total poste non décomposé"]*elemquantity)/100;
+      //     totalValue +=(categoryElement["Total poste non décomposé"]* elemquantity )/100;
+      //     totalValueTimesUncertainty += uncertainty; 
+      //     break;
 
-        case "taux de fuite en fin de vie":
-          if(!element.quantity){
-            element.quantity=thisyear
-          }
-          elemquantity=(thisyear-element.quantity)
-          elemquantity==0?elemquantity=1:elemquantity=elemquantity; 
-          uncertainty =(categoryElement["Total poste non décomposé"] * uncertaintyPercentage  );
-          emissions += (categoryElement["Total poste non décomposé"] *elemquantity)/100;
-          totalValue += (categoryElement["Total poste non décomposé"]* elemquantity )/100;
-          totalValueTimesUncertainty += uncertainty;
-          break;
+      //   case "taux de fuite en fin de vie":
+      //     if(!element.quantity){
+      //       element.quantity=thisyear
+      //     }
+      //     elemquantity=(thisyear-element.quantity)
+      //     elemquantity==0?elemquantity=1:elemquantity=elemquantity; 
+      //     uncertainty =(categoryElement["Total poste non décomposé"] * uncertaintyPercentage  );
+      //     emissions += (categoryElement["Total poste non décomposé"] *elemquantity)/100;
+      //     totalValue += (categoryElement["Total poste non décomposé"]* elemquantity )/100;
+      //     totalValueTimesUncertainty += uncertainty;
+      //     break;
           
-        default:
-          if(element.type=="evité"){
-            if(!element.quantity){
-              element.quantity=0
-            }
-            let emsevt=0
-            if(categoryElement["Emissions évitées"]){
-              emsevt=categoryElement["Emissions évitées"]
-            }
+      //   default:
+      //     if(element.type=="evité"){
+      //       if(!element.quantity){
+      //         element.quantity=0
+      //       }
+      //       let emsevt=0
+      //       if(categoryElement["Emissions évitées"]){
+      //         emsevt=categoryElement["Emissions évitées"]
+      //       }
     
-            uncertainty =emsevt * uncertaintyPercentage * element.quantity;
-            emissions += emsevt* element.quantity;
-            totalValueTimesUncertainty += uncertainty;
-            totalValue += emsevt * element.quantity;
+      //       uncertainty =emsevt * uncertaintyPercentage * element.quantity;
+      //       emissions += emsevt* element.quantity;
+      //       totalValueTimesUncertainty += uncertainty;
+      //       totalValue += emsevt * element.quantity;
 
-          }else{
-            if(!element.quantity){
-              element.quantity=0
-            }
+      //     }else{
+      //       if(!element.quantity){
+      //         element.quantity=0
+      //       }
     
-            uncertainty =categoryElement["Total poste non décomposé"] * uncertaintyPercentage * element.quantity;
-            emissions += categoryElement["Total poste non décomposé"] * element.quantity;
-            totalValueTimesUncertainty += uncertainty;
-            totalValue += categoryElement["Total poste non décomposé"] * element.quantity;
-          }
+      //       uncertainty =categoryElement["Total poste non décomposé"] * uncertaintyPercentage * element.quantity;
+      //       emissions += categoryElement["Total poste non décomposé"] * element.quantity;
+      //       totalValueTimesUncertainty += uncertainty;
+      //       totalValue += categoryElement["Total poste non décomposé"] * element.quantity;
+      //     }
           
-          break;
-      }
+      //     break;
+      // }
     // }
 
     
-    
-    
-    
- 
-    
-      if (categoryElement.Structure == "élément décomposé par gaz" || categoryElement.Structure == "élément décomposé par poste et par gaz") {
-        //console.log("element décomposé par gaz");
-        
-          if(categoryElement.CO2){
-            CO2 += (categoryElement.CO2 * element.quantity);
-            
-          }
-
-          if(categoryElement.CH4 ){
-            CH4 += (categoryElement.CH4 * element.quantity);
+  
       
-          }
-          
-          if(categoryElement.N2O){
-            N2O += (categoryElement.N2O * element.quantity);
-        
-          }
-        
-          
-          if(categoryElement.CO2f ){
-
-        
-            CO2f += (categoryElement.CO2f * element.quantity);
-            
-          }
-        if(categoryElement.CH4f){
-          CH4f += (categoryElement.CH4f * element.quantity);
-        
-        }
-        
-        if(categoryElement.CH4b){
-          CH4b += (categoryElement.CH4b * element.quantity);
-        }
-        
-        //if (i == 1) {CO2 = "NC"}
-      }
+      console.log("element",element)
+      // emissions += (categoryElement["Total poste non décomposé"]*element.quantity)/100;
+      // totalValue +=(categoryElement["Total poste non décomposé"]* element.quantity )/100;
      
-  }else if(db_type=="AGRIBALYSE"){
-    Model = categoriesConnection2.model(category)
+    
+      const modeldb=await ModelDB.findOne({dbName:db_type})
+ 
+      const equation=modeldb.methode[element.sheetName]
+      const cleanedEquation = equation.filter(item => item !== '');
 
-    const categoryElement = await Model.findById(element.categoryElement);
+      const expression = cleanedEquation.map(item => {
+        if (item === 'quantity') {
+          return element.quantity; // Replace 'quantity' with element.quantity
+        } else if (categoryElement[item] !== undefined) {
+          return categoryElement[item]; // Replace other variables with values from categoryElement
+        }
+        return item; // Keep operators as is (*, +, etc.)
+      }).join(' ');
+      
+      try {
+        const result = eval(expression); // Be cautious with eval()
+        console.log('Result:', result); // Should print: 50 (5 * 10)
+        emissions+=result
+        totalValue+=result
+      } catch (error) {
+        console.error('Error evaluating expression:', error);
+      }
+    
+      // if (categoryElement.Structure == "élément décomposé par gaz" || categoryElement.Structure == "élément décomposé par poste et par gaz") {
+      //   //console.log("element décomposé par gaz");
+        
+      //     if(categoryElement.CO2){
+      //       CO2 += (categoryElement.CO2 * element.quantity);
+            
+      //     }
+
+      //     if(categoryElement.CH4 ){
+      //       CH4 += (categoryElement.CH4 * element.quantity);
+      
+      //     }
+          
+      //     if(categoryElement.N2O){
+      //       N2O += (categoryElement.N2O * element.quantity);
+        
+      //     }
+        
+          
+      //     if(categoryElement.CO2f ){
+
+        
+      //       CO2f += (categoryElement.CO2f * element.quantity);
+            
+      //     }
+      //   if(categoryElement.CH4f){
+      //     CH4f += (categoryElement.CH4f * element.quantity);
+        
+      //   }
+        
+      //   if(categoryElement.CH4b){
+      //     CH4b += (categoryElement.CH4b * element.quantity);
+      //   }
+        
+      //   //if (i == 1) {CO2 = "NC"}
+      // }
+     
+  // }else if(db_type=="AGRIBALYSE"){
+  //   Model = categoriesConnection2.model(category)
+
+  //   const categoryElement = await Model.findById(element.categoryElement);
   
-      emissions += (categoryElement["Total poste non décomposé"]*element.quantity)/100;
-      totalValue +=(categoryElement["Total poste non décomposé"]* element.quantity )/100;
-      console.log("emissions",emissions)
+  //     emissions += (categoryElement["Total poste non décomposé"]*element.quantity)/100;
+  //     totalValue +=(categoryElement["Total poste non décomposé"]* element.quantity )/100;
+  //     console.log("emissions",emissions)
     
   
-    console.log("categoryElement agri",categoryElement)
-        console.log("element.quantity",element.quantity)
+  //   console.log("categoryElement agri",categoryElement)
+  //       console.log("element.quantity",element.quantity)
         
         
-  }
+  // }
     
     i++;
    
@@ -410,7 +492,7 @@ const getBilan = async (req, res) => {
   }
   try {
     console.log("selected",selectedCategoryElements)
-    const carbonFootprint = db_type=="ADEM"?await CarbonFootprintADEM.findOne({ clientId, year }):await CarbonFootprintAgribalyse.findOne({ clientId, year });
+    const carbonFootprint = await CarbonFootprint.findOne({ clientId, year })
     if (!carbonFootprint) {
       return res.status(404).json({ msg: "Bilan not found" });
     }
@@ -426,7 +508,7 @@ const getBilan = async (req, res) => {
 const getAllBilans = async (req, res) => {
   try {
     const clientId = req.clientId;
-    const carbonFootprints =  db_type=="ADEM"? await CarbonFootprintADEM.find({ clientId: clientId }):await CarbonFootprintAgribalyse.findOne({ clientId: clientId  });
+    const carbonFootprints =await CarbonFootprint.find({ clientId: clientId })
     return res.status(200).json({ carbonFootprints, clientId });
   } catch (error) {
     console.error("Error:", error);
@@ -442,10 +524,10 @@ const deleteBilan = async (req, res) => {
     return res.status(400).json({ msg: "Invalid client ID" });
   }
   try {
-    const carbonFootprint =db_type=="ADEM"?  await CarbonFootprintADEM.findOneAndDelete({
+    const carbonFootprint = await CarbonFootprint.findOneAndDelete({
       clientId,
       year,
-    }) :await CarbonFootprintAgribalyse.findOneAndDelete({ clientId, year });
+    })  
     if (!carbonFootprint) {
       return res.status(404).json({ msg: "Bilan not found" });
     }

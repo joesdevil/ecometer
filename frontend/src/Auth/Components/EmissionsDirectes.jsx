@@ -136,7 +136,7 @@ const Styles = {
 };
 
 
-function EmissionsDirectes({step}) {
+function EmissionsDirectes({step,sheetNamem}) {
 
 
   console.log("actttttt",step)
@@ -327,13 +327,19 @@ function EmissionsDirectes({step}) {
   const [indice, setIndice] = useState();
   const [idElment, setIdElment] = useState();
   const [Quantité, setQuantité] = useState(0);
+   
+ 
   const handleChange = (e) => {
     setQuantité(Number(e.target.value)); //
   };
+
+  console.log("sheetName",sheetNamem)
   const handleSave = async () => {
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("bilan", bilan);
-    bilan.selectedCategoryElements[indice].push({
+    bilan.selectedCategoryElements.push({
+      category:sheetNamem.replaceAll(" ",""),
+      sheetName:sheetNamem,
       quantity: Quantité,
       categoryElement: idElment,
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }
@@ -411,7 +417,7 @@ function EmissionsDirectes({step}) {
                               style={{ marginTop: "-8px" }}
                             >
                               <Typography style={Styles.contenuEtape}>
-                                 Quantité   {}
+                                 Quantité  
                               </Typography>
                             </Grid>
                             { option.split(",")[3]=="ratio de charge" ? 

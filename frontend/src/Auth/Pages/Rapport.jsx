@@ -14,7 +14,13 @@ const Rapport = () => {
   const [scope3, setScope3] = useState(0);
   const Data = JSON.parse(localStorage.getItem("ClientBilan"));
   const calculateScopeEmissions = () => {
-    Data.emissionPosts.map((element) => {
+    console.log("emissionPosts", Data.emissionPosts);
+  
+    let scope1Total = 0;
+    let scope2Total = 0;
+    let scope3Total = 0;
+  
+    Data.emissionPosts.forEach((element) => {
       if (
         element.index === 1.1 ||
         element.index === 1.2 ||
@@ -22,22 +28,28 @@ const Rapport = () => {
         element.index === 1.4 ||
         element.index === 1.5
       ) {
-        console.log("element.emissions",element.emissions);
-        setScope1((prev) => prev + element.emissions);
+        console.log("element.emissions", element.emissions);
+        scope1Total += element.emissions;
       } else if (element.index === 2.1 || element.index === 2.2) {
-        setScope2((prev) => prev + element.emissions);
+        scope2Total += element.emissions;
       } else {
-        setScope3((prev) => prev + element.emissions);
+        scope3Total += element.emissions;
       }
-      setTotal((prev) => prev + element.emissions);
     });
+  
+    // Set the states all at once after calculating the totals
+    setScope1(scope1Total);
+    setScope2(scope2Total);
+    setScope3(scope3Total);
+    setTotal(scope1Total + scope2Total + scope3Total);
     setYear(Data.year);
   };
-
+  
   useEffect(() => {
     calculateScopeEmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
 
   return (
     <Grid container>
@@ -154,10 +166,10 @@ const Rapport = () => {
                                 marginRight: { md: "25px" },
                               }}
                             >
-                              {(total / 1000).toFixed(2)}
+                              {(total).toFixed(3)}
                               <span className="text-black text-[5vh]">
                                 {" "}
-                                tCO2e
+                                kg CO2e
                               </span>
                             </Typography>
                           </Grid>
@@ -247,13 +259,13 @@ const Rapport = () => {
                                     }}
                                   >
                                     {item === 1
-                                      ? (scope1 / 1000).toFixed(2)
+                                      ? (scope1 ).toFixed(3)
                                       : item === 2
-                                      ? (scope2 / 1000).toFixed(2)
-                                      : (scope3 / 1000).toFixed(2)}
+                                      ? (scope2 ).toFixed(3)
+                                      : (scope3 ).toFixed(3)}
                                     <span className="text-black text-[5vh]">
                                       {" "}
-                                      tCO2e
+                                      KG CO2e
                                     </span>
                                   </Typography>
                                 </Grid>

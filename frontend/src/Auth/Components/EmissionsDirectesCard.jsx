@@ -166,10 +166,9 @@ const EmissionsDirectesCard = () => {
                       post2.total +
                       post3.total +
                       post4.total +
-                      post5.total) /
-                    1000
+                      post5.total)
                   ).toFixed(2)}{" "}
-                  tCO2e
+                  kg CO2e
                 </Typography>
               </Grid>
             </Grid>

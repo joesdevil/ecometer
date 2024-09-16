@@ -62,9 +62,9 @@ const ScopesCard = () => {
           >
             <Typography style={Styles.ScopeText}>Scope 1</Typography>
             <Typography style={Styles.EmissionsText}>
-              {(scope1 / 1000).toFixed(3)}
+              {(scope1 ).toFixed(3)}
             </Typography>
-            <Typography style={Styles.UnityText}>tCO2e</Typography>
+            <Typography style={Styles.UnityText}>kg CO2e</Typography>
           </Paper>
         </Grid>
 
@@ -78,9 +78,9 @@ const ScopesCard = () => {
           >
             <Typography style={Styles.ScopeText}>Scope 2</Typography>
             <Typography style={Styles.EmissionsText}>
-              {(scope2 / 1000).toFixed(3)}
+              {(scope2 ).toFixed(3)}
             </Typography>
-            <Typography style={Styles.UnityText}>tCO2e</Typography>
+            <Typography style={Styles.UnityText}>kg CO2e</Typography>
           </Paper>
         </Grid>
 
@@ -94,9 +94,9 @@ const ScopesCard = () => {
           >
             <Typography style={Styles.ScopeText}>Scope 3</Typography>
             <Typography style={Styles.EmissionsText}>
-              {(scope3 / 1000).toFixed(3)}
+              {(scope3 ).toFixed(3)}
             </Typography>
-            <Typography style={Styles.UnityText}>tCO2e</Typography>
+            <Typography style={Styles.UnityText}>kg CO2e</Typography>
           </Paper>
         </Grid>
       </Grid>

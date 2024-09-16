@@ -161,10 +161,9 @@ const AchetesCard = () => {
                       post2.total +
                       post3.total +
                       post4.total +
-                      post5.total) /
-                    1000
-                  ).toFixed(2)}{" "}
-                  tCO2e
+                      post5.total)
+                  ).toFixed(3)}{" "}
+                  kg CO2e
                 </Typography>
               </Grid>
             </Grid>

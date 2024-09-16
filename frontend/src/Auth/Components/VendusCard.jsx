@@ -147,10 +147,9 @@ const VendusCard = () => {
                   }}
                 >
                   {(
-                    (post1.total + post2.total + post3.total + post4.total) /
-                    1000
-                  ).toFixed(2)}{" "}
-                  tCO2e
+                    (post1.total + post2.total + post3.total + post4.total) 
+                  ).toFixed(3)}{" "}
+                  kg CO2e
                 </Typography>
               </Grid>
             </Grid>

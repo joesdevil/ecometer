@@ -89,8 +89,7 @@ async function getNextLevelCategories(userSelectedCategories) {
   let Model;
   console.log("mainCategory",mainCategory)
   switch (mainCategory) {
-    case "ModelDB":
-      console.log("model db")
+    case "ModelDB": 
       Model = categoriesConnection.model("ModelDB");
       break;
     case "Combustibles":
@@ -130,13 +129,11 @@ async function getNextLevelCategories(userSelectedCategories) {
       Model = categoriesConnection.model("UTCF");
       break;
     // agribalyse
-    case "Produitsalimentaires":
-      console.log("salk")
+    case "Produitsalimentaires": 
       Model = categoriesConnection2.model("Produitsalimentaires");
       break; 
       
-    case "Produitsagricoles":
-      console.log("sal")
+    case "Produitsagricoles": 
       Model = categoriesConnection2.model("Produitsagricoles");
       break;
       
@@ -166,9 +163,8 @@ async function getNextLevelCategories(userSelectedCategories) {
   // Extract next level categories from matching documents
  
     matchingDocuments.forEach((doc) => {  
-
-  console.log("doc",doc)
-  console.log("doc categories",doc["categories"])
+ 
+   
 
       const nextCategoryIndex = doc.categories.indexOf(userSelectedCategories[userSelectedCategories.length-1]) + 1;
       console.log("nextCategoryIndex",nextCategoryIndex)

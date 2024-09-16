@@ -48,13 +48,12 @@ const TotalCard = () => {
         <Grid item>
           <Typography style={Styles.TotalText}>
             {(
-              JSON.parse(localStorage.getItem("ClientBilan")).totalEmissions /
-              1000
-            ).toFixed(2)}
+              JSON.parse(localStorage.getItem("ClientBilan")).totalEmissions
+            ).toFixed(3)}
           </Typography>
         </Grid>
         <Grid item>
-          <Typography style={Styles.UnityText}>tCO2e</Typography>
+          <Typography style={Styles.UnityText}>kg CO2e</Typography>
         </Grid>
       </Grid>
       <Typography style={Styles.IncertitudeText}>

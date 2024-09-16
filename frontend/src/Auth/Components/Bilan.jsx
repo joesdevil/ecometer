@@ -97,34 +97,35 @@ function Bilan({ showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
 
   const data = {
     year: 2024,
-    clientId: "66661fd621a877d16ef65508", //localStorage.getItem("clientId"),
-    selectedCategoryElements: [
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [], //7
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [], //15
-      [],
-      [],
-      [],
-      [],
-      [],
-      [], //21
-      [], //22
-      [], //23
-      [], //23
-      [], //23
-    ],
+    clientId: "66661fd621a877d16ef65508",  
+    selectedCategoryElements:[]
+    // selectedCategoryElements: [
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [], //7
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [], //15
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [],
+    //   [], //21
+    //   [], //22
+    //   [], //23
+    //   [], //23
+    //   [], //23
+    // ],
   };
   const handleClick = () => {
     localStorage.setItem("db_type", selectedDb);
