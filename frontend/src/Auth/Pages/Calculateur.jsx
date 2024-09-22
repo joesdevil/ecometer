@@ -109,9 +109,11 @@ function Calculateur() {
         }));
   
        
-        console.log("transformedDbType",Object.values(response.data.steps))
+        console.log("transformedDbType 1",Object.values(response.data.steps))
         setDbs_type1(Object.values(response.data.steps)); 
-        setSteps(transformedDbType); 
+
+        setSteps(Object.values(response.data.steps)); 
+        console.log("transformedDbType",steps)
         
       } catch (err) {
         console.log('Failed to fetch headers');
@@ -304,8 +306,8 @@ function Calculateur() {
 
     // Check if dbs_type1 has data and activeStep is valid
     if (dbs_type1[0] && dbs_type1[0][activeStep]) {
-      console.log("2nd step calc ",dbs_type1[0][activeStep]["list"])
-      setDbs_type1(dbs_type1[0][activeStep]); // Update the state
+      console.log("2nd step ",dbs_type1)
+      setDbs_type1(dbs_type1); // Update the state
     }
   }, [activeStep, dbs_type1, setDbs_type1List]); // Only re-run when activeStep changes
 
@@ -360,7 +362,7 @@ function Calculateur() {
                           gutterBottom
                           style={Styles.titreEtape}
                         >
-                          {steps[activeStep].label}
+                          {steps[activeStep][0].label}
                         </Typography>
                       </Grid>
 
@@ -370,7 +372,10 @@ function Calculateur() {
                           alternativeLabel
                           connector={<CustomStepConnector />}
                         >
-                          {steps.map((step, index) => (
+                          {steps.map((step, index) => 
+                            {
+                              console.log("fuck",steps)
+                            return (
                             <Step key={index}>
                               <StepLabel
                                 StepIconComponent={ColorlibStepIcon}
@@ -378,7 +383,9 @@ function Calculateur() {
                                 icon={99}
                               ></StepLabel>
                             </Step>
-                          ))}
+                          )
+                        }
+                          )}
                         </Stepper>
                       </Grid>
 
@@ -431,11 +438,8 @@ function Calculateur() {
 
             
                   
-
-
-{dbs_type1.list.map((step, index) => {
- 
-        // Check if the current step is the active one
+{dbs_type1[activeStep][0].list.map((step, index) => {
+  
         if (index === activeStep) {
           return (
             <div key={index}>
@@ -448,43 +452,10 @@ function Calculateur() {
             </div>
           );
         }
-        return null; // Return null if the condition isn't met
-      })}
+        return null;  
 
-
+  })}
                                         
-{/* 
-                      {activeStep === 0 && selectedDB=="ademe" && (
-                          <EmissionsDirectes
-                            emissionsList={emissionsList}
-                            setEmissionsList={setEmissionsList}
-                          />
-                        )}
-                        {activeStep === 1 && selectedDB=="ademe" && (
-                          <Energie
-                            energieList={energieList}
-                            setEnergieList={setEnergieList}
-                          />
-                        )}
-                        {activeStep === 2  && selectedDB=="ademe" && (
-                          <Deplacement
-                            deplacementList={deplacementList}
-                            setDeplacementList={setDeplacementList}
-                          />
-                        )}
-                        {activeStep === 3 && selectedDB=="ademe" && (
-                          <ProduitsAchetes
-                            produitsAchetesList={produitsAchetesList}
-                            setProduitsAchetesList={setProduitsAchetesList}
-                          />
-                        )}
-                        {activeStep === 4 && selectedDB=="ademe" && (
-                          <ProduitsVendu
-                            produitsVendusList={produitsVendusList}
-                            setProduitsVendusList={setProduitsVendusList}
-                          />
-                        )}
-                        {activeStep === 5 && selectedDB=="ademe" && <AutresEmissions />} */}
                       </Grid>
 
                       <Grid item xs={12} md={10} sx={{ marginTop: "30px" }}>

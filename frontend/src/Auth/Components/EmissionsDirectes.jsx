@@ -139,22 +139,29 @@ const Styles = {
 function EmissionsDirectes({step,sheetNamem}) {
 
 
-  console.log("actttttt",step)
+ 
 
   const [dbs_type, setDbs_type] = useState({})
   const [dbs_type1List,setDbs_type1List]=useState([])
+
   useEffect(() => {
-    // Define the async function to fetch data
+    
+ 
     const fetchHeaders = async () => {
       try {
         // Replace with your API endpoint
         const name=localStorage.getItem("db_type")
         const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
+
         console.log("test",response.data)
-        setDbs_type(response.data); 
-        setEmissionsList(Object.values(response.data.steps)[0][step].list)
-        console.log("2nd step emmision",Object.values(response.data.steps)[0][step].list)
+
+        setDbs_type(response.data);  
+
+        setEmissionsList(Object.values(response.data.steps)[step][0].list)
         
+        console.log("hii",response.data)
+      
+     
       } catch (err) {
         console.log('Failed to fetch headers');
       } finally {
