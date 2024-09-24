@@ -35,17 +35,18 @@ const createBilan = async (req, res) => {
   modelattrs.map((item) => {
     console.log("steps mapped=> ",item)
 
-   
-      console.log("object keys",Object.keys(item.steps))
-      const CategoryCurrent=Object.keys(item.steps)[0].replaceAll(" ", "")
-      console.log("CategoryName",CategoryCurrent)
-
-      Object.keys(item.steps).map((category,x)=>{
-         console.log("==>",category)
+    
+      console.log("object keys",item.steps)
      
-         item.steps[category].map((list,y)=>{
-         
-          list.list.map((step,z)=>{
+      let y = 1
+
+      item.steps.map((li,x)=>{
+         console.log(" item.steps==>", li.list)
+     
+        
+         li.list.map((step,z)=>{
+
+          const CategoryCurrent=step.dialogueOptions[0].value
 
             if(y !=0){
               y=y+1
@@ -64,7 +65,7 @@ const createBilan = async (req, res) => {
             })
             console.log("dataToPush=>>",dataToPush)
           })
-        })
+        
 
       })
 
@@ -129,13 +130,15 @@ const updateAndCalculateBilan = async (req, res) => {
 
       const categoryElements = selectedCategoryElements;
        
-        
-
+        console.log("carbonFootprint.emissionPosts[i]",carbonFootprint.emissionPosts[i])
+      try {
         const { emissions, weightedAverageUncertainty, CO2 ,CH4 , N2O ,CO2f,CH4f,CH4b } =
-          await calculateEmissionsPost(
-            carbonFootprint.emissionPosts[i].category,
-            categoryElements
-          );
+        await calculateEmissionsPost(
+          carbonFootprint.emissionPosts[i].category,
+          categoryElements
+        );
+     
+       
           
           if(!isNaN(emissions)){
             carbonFootprint.emissionPosts[i].emissions = emissions;
@@ -168,7 +171,9 @@ const updateAndCalculateBilan = async (req, res) => {
           }
         
         
-        
+        } catch (error) {
+          console.log("..")
+        }
         
        
       
@@ -367,12 +372,13 @@ const calculateEmissionsPost = async (category, categoryElements) => {
         return item; // Keep operators as is (*, +, etc.)
       }).join(' ');
       
-      try {
+      if (true) {
+
         const result = eval(expression); // Be cautious with eval()
         console.log('Result:', result); // Should print: 50 (5 * 10)
         emissions+=result
         totalValue+=result
-      } catch (error) {
+      } else{
         console.error('Error evaluating expression:', error);
       }
     

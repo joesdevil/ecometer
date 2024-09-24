@@ -28,8 +28,8 @@ const ModelElementSchema = new Schema({
   },
   
   steps:{
-    type: Object,
-    required: [true, 'headers field is required']
+    type: Array,
+    required: [true, 'steps field is required']
   }
   
 

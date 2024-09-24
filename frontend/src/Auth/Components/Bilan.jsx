@@ -86,7 +86,7 @@ const Styles = {
 
 
 
-function Bilan({ showBilan, setShowBilan ,showUpload=false,onButtonClick}) { 
+function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) { 
   
 
   const handleClickUpload = () => {

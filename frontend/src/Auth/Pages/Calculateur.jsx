@@ -26,6 +26,7 @@ import CustomStepConnector from "./CustomStepConnector";
 import ColorlibStepIcon from "./ColorlibStepIcon";
 import Bilan from "../Components/Bilan";
 import { toast } from 'react-toastify';
+import { act } from "react";
 
 
 const Styles = {
@@ -103,16 +104,17 @@ function Calculateur() {
         // Replace with your API endpoint
         const name=localStorage.getItem("db_type")
         const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
-        console.log("sleected000",Object.values(response.data.steps)[0])
-        const transformedDbType = Object.values(response.data.steps)[0].map((hmm) => ({
+        console.log("active step",activeStep)
+        console.log("sleected000",response.data.steps)
+        const transformedDbType = response.data.steps.map((hmm) => ({
           label: hmm.label,
         }));
   
        
-        console.log("transformedDbType 1",Object.values(response.data.steps))
-        setDbs_type1(Object.values(response.data.steps)); 
+        console.log("transformedDbType 1",response.data.steps)
+        setDbs_type1List(response.data.steps); 
 
-        setSteps(Object.values(response.data.steps)); 
+        setSteps(response.data.steps); 
         console.log("transformedDbType",steps)
         
       } catch (err) {
@@ -301,16 +303,18 @@ function Calculateur() {
    
  
   useEffect(() => {
-    console.log("activeStep",activeStep)
+    console.log("activeStep hh",activeStep)
     
-
+    console.log("tett",dbs_type1)
     // Check if dbs_type1 has data and activeStep is valid
-    if (dbs_type1[0] && dbs_type1[0][activeStep]) {
-      console.log("2nd step ",dbs_type1)
+    if ( dbs_type1) {
+      console.log("2nd step bb s",dbs_type1)
       setDbs_type1(dbs_type1); // Update the state
     }
   }, [activeStep, dbs_type1, setDbs_type1List]); // Only re-run when activeStep changes
 
+
+  console.log("steps",steps)
 
 
   return (
@@ -362,7 +366,7 @@ function Calculateur() {
                           gutterBottom
                           style={Styles.titreEtape}
                         >
-                          {steps[activeStep][0].label}
+                          {steps[activeStep].label}
                         </Typography>
                       </Grid>
 
@@ -374,7 +378,7 @@ function Calculateur() {
                         >
                           {steps.map((step, index) => 
                             {
-                              console.log("fuck",steps)
+                             
                             return (
                             <Step key={index}>
                               <StepLabel
@@ -437,24 +441,24 @@ function Calculateur() {
 
 
             
-                  
-{dbs_type1[activeStep][0].list.map((step, index) => {
-  
-        if (index === activeStep) {
-          return (
-            <div key={index}>
-              <EmissionsDirectes
-                emissionsList={dbs_type1List}
-                setEmissionsList={setDbs_type1List}
-                step={activeStep}
-                sheetNamem={step.dialogueOptions[0].value}
-              />
-            </div>
-          );
-        }
-        return null;  
+               
 
-  })}
+
+  
+    <div >
+      <EmissionsDirectes
+        emissionsList={steps[activeStep]}
+        setEmissionsList={setDbs_type1List}
+        step={activeStep}
+        // sheetNamem={Object.values(steps[activeStep])[1][indx].dialogueOptions[0]?.value}
+        sheetNamem={steps[activeStep]}
+      />
+    </div>
+ 
+ 
+
+
+   
                                         
                       </Grid>
 

@@ -136,10 +136,14 @@ const Styles = {
 };
 
 
-function EmissionsDirectes({step,sheetNamem}) {
 
+function EmissionsDirectes({step}) {
+  const [emissionsList, setEmissionsList] = useState( []);
 
- 
+  // useEffect(() => {
+  //   setEmissionsList(parentEmissionsList);
+  // }, [parentEmissionsList]);
+
 
   const [dbs_type, setDbs_type] = useState({})
   const [dbs_type1List,setDbs_type1List]=useState([])
@@ -153,13 +157,12 @@ function EmissionsDirectes({step,sheetNamem}) {
         const name=localStorage.getItem("db_type")
         const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
 
-        console.log("test",response.data)
+        console.log("bnbnbn",response.data.steps)
 
         setDbs_type(response.data);  
-
-        setEmissionsList(Object.values(response.data.steps)[step][0].list)
         
-        console.log("hii",response.data)
+        setEmissionsList(response.data.steps)
+      
       
      
       } catch (err) {
@@ -174,9 +177,7 @@ function EmissionsDirectes({step,sheetNamem}) {
      
   }, []);
 
-
-  const [emissionsList, setEmissionsList] = useState([])
-
+ 
   // const [emissionsList, setEmissionsList] = useState([
   //   {
   //     label: "émissions directes des sources fixes de combustion",
@@ -219,6 +220,7 @@ function EmissionsDirectes({step,sheetNamem}) {
   //     selectedOptions: [],
   //   },
   // ]);
+  
   const [selectedEmissionIndex, setSelectedEmissionIndex] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -302,6 +304,7 @@ function EmissionsDirectes({step,sheetNamem}) {
     }
   };
   const handleClickOpen = (index, ind) => {
+    console.log("selectedEmissionIndex",index)
     setSelectedEmissionIndex(index);
     setOpenDialog(true);
     setIndice(ind);
@@ -315,7 +318,8 @@ function EmissionsDirectes({step,sheetNamem}) {
   };
   const handleValider = () => {
     const updatedEmissionsList = [...emissionsList];
-    updatedEmissionsList[selectedEmissionIndex].selectedOptions.push(
+    
+    updatedEmissionsList[step].list[selectedEmissionIndex].selectedOptions.push(
       ...selectedOptions
     );
     setEmissionsList(updatedEmissionsList);
@@ -325,8 +329,8 @@ function EmissionsDirectes({step,sheetNamem}) {
   };
   const SupprimerSelectedOption = (optionToRemove) => {
     const updatedEmissionsList = [...emissionsList];
-    updatedEmissionsList[selectedEmissionIndex].selectedOptions =
-      updatedEmissionsList[selectedEmissionIndex].selectedOptions.filter(
+    updatedEmissionsList[step][0].list[selectedEmissionIndex].selectedOptions =
+      updatedEmissionsList[step][0].list[selectedEmissionIndex].selectedOptions.filter(
         (option) => option !== optionToRemove
       );
     setEmissionsList(updatedEmissionsList);
@@ -339,14 +343,14 @@ function EmissionsDirectes({step,sheetNamem}) {
   const handleChange = (e) => {
     setQuantité(Number(e.target.value)); //
   };
-
-  console.log("sheetName",sheetNamem)
-  const handleSave = async () => {
+ 
+  const handleSave = async (sheetname) => {
+    console.log("sheetname",sheetname)
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("bilan", bilan);
     bilan.selectedCategoryElements.push({
-      category:sheetNamem.replaceAll(" ",""),
-      sheetName:sheetNamem,
+      category:sheetname.replaceAll(" ",""),
+      sheetName:sheetname,
       quantity: Quantité,
       categoryElement: idElment,
     }); //{ "quantity": 3, "categoryElement": "66101ed3aad307245468b5e1" }
@@ -355,234 +359,248 @@ function EmissionsDirectes({step,sheetNamem}) {
   const [loading, setLoading] = useState(false);
   return (
     <div>
-      {emissionsList.map((produit, index) => (
-        <Box key={index} p={2} bgcolor={"#F0F2F7"} mb={2} borderRadius={4}>
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item xs={12} md={9}>
-              <Typography variant="h6" gutterBottom style={Styles.contenuEtape}>
-                {produit.label}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={3} sx={{ textAlign: "center" }}>
-              <Button
-                style={Styles.ajouterActiviteButton}
-                onClick={() => handleClickOpen(index, produit.ind)}
-              >
-                <Typography style={Styles.ajouterText}>
-                  Ajouter Activité
-                </Typography>
-              </Button>
-            </Grid>
-            {/* write code  */}
-            <Grid item xs={12} md={12}>
-              {produit.selectedOptions &&
-                produit.selectedOptions.length > 0 && (
-                  <Grid style={{ marginTop: "15px" }}>
-                    {produit.selectedOptions.map((option, optionIndex) => (
-                       
-                      <Grid
-                        key={optionIndex}
-                        container
-                        sx={{
-                          border: "1px solid black",
-                          borderRadius: "15px",
-                          marginBottom: "15px",
-                          padding: "20px",
-                          borderColor: "#6F6C8F",
-                        }}
-                      >
-                        
-                        <Grid item md={12}>
-                          <Grid container>
-                            <Grid
-                              item
-                              xs={12}
-                              md={12}
-                              sx={{
-                                marginBottom: "15px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Typography
-                                key={optionIndex}
-                                style={Styles.contenuEtape}
-                              >
-                                {option}
-                              </Typography>
-                              <CroixIcon
-                                onClick={() => SupprimerSelectedOption(option)}
-                              />
-                            </Grid>
-                            <Grid
-                              item
-                              md={1.6}
-                              xs={12}
-                              container
-                              alignItems="center"
-                              style={{ marginTop: "-8px" }}
-                            >
-                              <Typography style={Styles.contenuEtape}>
-                                 Quantité  
-                              </Typography>
-                            </Grid>
-                            { option.split(",")[3]=="ratio de charge" ? 
-                            <Grid item xs={12} md={10.4}>
-                              <TextField
-                                type="number"
-                                variant="outlined"
-                                fullWidth
-                                sx={{
-                                  borderRadius: "15px",
-                                  mt: 1,
-                                  mb: 2,
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure
-                                    borderRadius: "15px",
-                                  },
-                                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
-                                    borderRadius: "15px",
-                                  },
-                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
-                                    {
-                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
-                                      borderRadius: "15px",
-                                    },
-                                }}
-                                onChange={handleChange}
-                              />
-                              <Button
-                                variant="contained"
-                                href="#contained-buttons"
-                                onClick={handleSave}
-                              >
-                                save
-                              </Button>
-                            </Grid>
-                            :
-                            <Grid item xs={12} md={10.4}>
-                            <TextField
-                              type="number"
-                              variant="outlined"
-                              fullWidth
-                              sx={{
-                                borderRadius: "15px",
-                                mt: 1,
-                                mb: 2,
-                                "& .MuiOutlinedInput-notchedOutline": {
-                                  borderColor: "#969696 !important", // Couleur de la bordure
-                                  borderRadius: "15px",
-                                },
-                                "&:hover .MuiOutlinedInput-notchedOutline": {
-                                  borderColor: "#969696 !important", // Couleur de la bordure en survol
-                                  borderRadius: "15px",
-                                },
-                                "& .Mui-focused .MuiOutlinedInput-notchedOutline":
-                                  {
-                                    borderColor: "#969696 !important", // Couleur de la bordure en focus
-                                    borderRadius: "15px",
-                                  },
-                              }}
-                              onChange={handleChange}
-                            />
-                            <Button
-                              variant="contained"
-                              href="#contained-buttons"
-                              onClick={handleSave}
-                            >
-                              save
-                            </Button>
-                          </Grid>
+      {emissionsList[step] && Array.isArray(emissionsList[step].list) ? (
+        // Get the list from the emissionsList
+        <>
+          {emissionsList[step]["list"].map((produit, index) => (
+             <Box key={index} p={2} bgcolor={"#F0F2F7"} mb={2} borderRadius={4}>
+             <Grid container justifyContent="space-between" alignItems="center">
+               <Grid item xs={12} md={9}>
+                 <Typography variant="h6" gutterBottom style={Styles.contenuEtape}>
+                   {produit.label}
+                 </Typography>
+               </Grid>
+               <Grid item xs={12} md={3} sx={{ textAlign: "center" }}>
+                 <Button
+                   style={Styles.ajouterActiviteButton}
+                   onClick={() => handleClickOpen(index, produit.ind)}
+                 >
+                   <Typography style={Styles.ajouterText}>
+                     Ajouter Activité
+                   </Typography>
+                 </Button>
+               </Grid>
+               {/* write code  */}
+               <Grid item xs={12} md={12}>
+                 {produit.selectedOptions &&
+                   produit.selectedOptions.length > 0 && (
+                     <Grid style={{ marginTop: "15px" }}>
+                       {produit.selectedOptions.map((option, optionIndex) =>{ 
+                      
+                       return(
+                          
+                         <Grid
+                           key={optionIndex}
+                           container
+                           sx={{
+                             border: "1px solid black",
+                             borderRadius: "15px",
+                             marginBottom: "15px",
+                             padding: "20px",
+                             borderColor: "#6F6C8F",
+                           }}
+                         >
+                           
+                           <Grid item md={12}>
+                             <Grid container>
+                               <Grid
+                                 item
+                                 xs={12}
+                                 md={12}
+                                 sx={{
+                                   marginBottom: "15px",
+                                   display: "flex",
+                                   justifyContent: "space-between",
+                                   alignItems: "center",
+                                 }}
+                               >
+                                 <Typography
+                                   key={optionIndex}
+                                   style={Styles.contenuEtape}
+                                 >
+                                   {option}
+                                 </Typography>
+                                 <CroixIcon
+                                   onClick={() => SupprimerSelectedOption(option)}
+                                 />
+                               </Grid>
+                               <Grid
+                                 item
+                                 md={1.6}
+                                 xs={12}
+                                 container
+                                 alignItems="center"
+                                 style={{ marginTop: "-8px" }}
+                               >
+                                 <Typography style={Styles.contenuEtape}>
+                                    Quantité  
+                                 </Typography>
+                               </Grid>
+                               { option.split(",")[3]=="ratio de charge" ? 
+                               <Grid item xs={12} md={10.4}>
+                                 <TextField
+                                   type="number"
+                                   variant="outlined"
+                                   fullWidth
+                                   sx={{
+                                     borderRadius: "15px",
+                                     mt: 1,
+                                     mb: 2,
+                                     "& .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure
+                                       borderRadius: "15px",
+                                     },
+                                     "&:hover .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                       borderRadius: "15px",
+                                     },
+                                     "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                       {
+                                         borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                         borderRadius: "15px",
+                                       },
+                                   }}
+                                   onChange={handleChange}
+                                 />
+                                 <Button
+                                   variant="contained"
+                                   href="#contained-buttons"
+                                   onClick={()=>{handleSave(produit.dialogueOptions[0].value)}}
+                                 >
+                                   save
+                                 </Button>
+                               </Grid>
+                               :
+                               <Grid item xs={12} md={10.4}>
+                               <TextField
+                                 type="number"
+                                 variant="outlined"
+                                 fullWidth
+                                 sx={{
+                                   borderRadius: "15px",
+                                   mt: 1,
+                                   mb: 2,
+                                   "& .MuiOutlinedInput-notchedOutline": {
+                                     borderColor: "#969696 !important", // Couleur de la bordure
+                                     borderRadius: "15px",
+                                   },
+                                   "&:hover .MuiOutlinedInput-notchedOutline": {
+                                     borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                     borderRadius: "15px",
+                                   },
+                                   "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                     {
+                                       borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                       borderRadius: "15px",
+                                     },
+                                 }}
+                                 onChange={handleChange}
+                               />
+                               <Button
+                                 variant="contained"
+                                 href="#contained-buttons"
+                                 onClick={handleSave(produit.dialogueOptions[0].value)}
+                               >
+                                 save
+                               </Button>
+                             </Grid>
+   
+                                 }
+                              { option.split(",")[3]=="taux de fuite annuel" && 
+                               <Grid item xs={12} md={10.4}>
+                                 depuis quelle années tu l'as:
+                                 <TextField
+                                   type="number"
+                                   variant="outlined"
+                                   fullWidth
+                                   sx={{
+                                     borderRadius: "15px",
+                                     mt: 1,
+                                     mb: 2,
+                                     "& .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure
+                                       borderRadius: "15px",
+                                     },
+                                     "&:hover .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                       borderRadius: "15px",
+                                     },
+                                     "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                       {
+                                         borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                         borderRadius: "15px",
+                                       },
+                                   }}
+                                   onChange={handleChange}
+                                 />
+                                 <Button
+                                   variant="contained"
+                                   href="#contained-buttons"
+                                   onClick={handleSave(produit.dialogueOptions[0].value)}
+                                 >
+                                   save
+                                 </Button>
+                               </Grid>
+   
+                                 }
+                                 { option.split(",")[3]=="taux de fuite en fin de vie" && 
+                               <Grid item xs={12} md={10.4}>
+                                 déjà jeté (si oui, en quelle année) ?:
+                                 <TextField
+                                   type="number"
+                                   variant="outlined"
+                                   fullWidth
+                                   sx={{
+                                     borderRadius: "15px",
+                                     mt: 1,
+                                     mb: 2,
+                                     "& .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure
+                                       borderRadius: "15px",
+                                     },
+                                     "&:hover .MuiOutlinedInput-notchedOutline": {
+                                       borderColor: "#969696 !important", // Couleur de la bordure en survol
+                                       borderRadius: "15px",
+                                     },
+                                     "& .Mui-focused .MuiOutlinedInput-notchedOutline":
+                                       {
+                                         borderColor: "#969696 !important", // Couleur de la bordure en focus
+                                         borderRadius: "15px",
+                                       },
+                                   }}
+                                   onChange={handleChange}
+                                 />
+                                 <Button
+                                   variant="contained"
+                                   href="#contained-buttons"
+                                   onClick={handleSave(produit.dialogueOptions[0].value)}
+                                 >
+                                   save
+                                 </Button>
+                               </Grid>
+   
+                                 }
+                             </Grid>
+                           </Grid>
+                         </Grid>
+                       )})}
+                     </Grid>
+                   )}
+               </Grid>
+             </Grid>
+           </Box>
+          ))}
+        </>
+      ) : (
+        <p>No data available for this step.</p>
+      )
+      }
+  
+      
 
-                              }
-                           { option.split(",")[3]=="taux de fuite annuel" && 
-                            <Grid item xs={12} md={10.4}>
-                              depuis quelle années tu l'as:
-                              <TextField
-                                type="number"
-                                variant="outlined"
-                                fullWidth
-                                sx={{
-                                  borderRadius: "15px",
-                                  mt: 1,
-                                  mb: 2,
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure
-                                    borderRadius: "15px",
-                                  },
-                                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
-                                    borderRadius: "15px",
-                                  },
-                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
-                                    {
-                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
-                                      borderRadius: "15px",
-                                    },
-                                }}
-                                onChange={handleChange}
-                              />
-                              <Button
-                                variant="contained"
-                                href="#contained-buttons"
-                                onClick={handleSave}
-                              >
-                                save
-                              </Button>
-                            </Grid>
 
-                              }
-                              { option.split(",")[3]=="taux de fuite en fin de vie" && 
-                            <Grid item xs={12} md={10.4}>
-                              déjà jeté (si oui, en quelle année) ?:
-                              <TextField
-                                type="number"
-                                variant="outlined"
-                                fullWidth
-                                sx={{
-                                  borderRadius: "15px",
-                                  mt: 1,
-                                  mb: 2,
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure
-                                    borderRadius: "15px",
-                                  },
-                                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#969696 !important", // Couleur de la bordure en survol
-                                    borderRadius: "15px",
-                                  },
-                                  "& .Mui-focused .MuiOutlinedInput-notchedOutline":
-                                    {
-                                      borderColor: "#969696 !important", // Couleur de la bordure en focus
-                                      borderRadius: "15px",
-                                    },
-                                }}
-                                onChange={handleChange}
-                              />
-                              <Button
-                                variant="contained"
-                                href="#contained-buttons"
-                                onClick={handleSave}
-                              >
-                                save
-                              </Button>
-                            </Grid>
 
-                              }
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    ))}
-                  </Grid>
-                )}
-            </Grid>
-          </Grid>
-        </Box>
-      ))}
-
-      <Dialog
+<Dialog
         open={openDialog}
         onClose={handleClose}
         fullWidth
@@ -607,13 +625,20 @@ function EmissionsDirectes({step,sheetNamem}) {
                   <option disabled selected>
                     Selectionner une catégorie
                   </option>
-                  {emissionsList[selectedEmissionIndex].dialogueOptions.map(
-                    (option, index) => (
-                      <option key={index} value={option.value}>
-                        {option.label}
-                      </option>
-                    )
-                  )}
+                  {emissionsList[step]  ? (
+        (() => {
+          
+          return emissionsList[step].list[selectedEmissionIndex].dialogueOptions.map((option, index) => (
+            <option key={index} value={option.value}>
+              {option.label}
+            </option>
+          ));
+        })()
+      ) : (
+        <option disabled selected>
+          No data
+        </option>
+      )}
                 </select>
               </Grid>
             )}
@@ -694,18 +719,17 @@ function EmissionsDirectes({step,sheetNamem}) {
                       fe.map((item, index) => {
                           
                       
-                       
-
+                   
                           // dbs_type
                           
                           return (
                             <FormControlLabel
                               key={index}
-                              value={item._id} // Assuming _id is unique for each item
+                              value={item._id} // Assuming _id is unique for each itemdisplay
                               control={<Radio />} // Radio button component
                               label={
-                                Array.isArray(dbs_type["display"][item.categories[0]]) ? // Check if dbs_type["display"] is an array
-                                dbs_type["display"][item.categories[0]]
+                                dbs_type["display"] && Object.keys(dbs_type["display"][item.categories[0]]) ? // Check if dbs_type["display"] is an array
+                                Object.keys(dbs_type["display"][item.categories[0]])
                                     .map((db) => item[db]) // Map over dbs_type["display"] to get the values
                                     .join(" , ") // Join the mapped array into a single string
                                 : "Invalid Display Type" // Fallback if display is not an array
@@ -746,8 +770,12 @@ function EmissionsDirectes({step,sheetNamem}) {
           </Grid>
         </DialogContent>
       </Dialog>
+
+
+
     </div>
   );
+  
 }
 
 export default EmissionsDirectes;
