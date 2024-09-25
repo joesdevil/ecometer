@@ -613,35 +613,34 @@ function EmissionsDirectes({step}) {
             spacing={2}
             sx={{ paddingLeft: "16px", paddingRight: "16px" }}
           >
-            {selectedEmissionIndex !== null && (
-              <Grid item xs={12} md={12}>
-                <Typography variant="h6" style={Styles.customTitle}>
-                  Catégorie 1
-                </Typography>
-                <select
-                  style={{ ...Styles.customSelect, width: "100%" }}
-                  onChange={handleCategory2}
-                  >
-                  <option disabled selected>
-                    Selectionner une catégorie
-                  </option>
-                  {emissionsList[step]  ? (
-        (() => {
-          
-          return emissionsList[step].list[selectedEmissionIndex].dialogueOptions.map((option, index) => (
-            <option key={index} value={option.value}>
-              {option.label}
-            </option>
-          ));
-        })()
+           {selectedEmissionIndex !== null && (
+  <Grid item xs={12} md={12}>
+    <Typography variant="h6" style={Styles.customTitle}>
+      Catégorie 1
+    </Typography>
+    <select
+      style={{ ...Styles.customSelect, width: "100%" }}
+      onChange={handleCategory2}
+      defaultValue="" // This ensures the default option is selected until user interaction
+    >
+      <option value="" disabled>
+        Selectionner une catégorie
+      </option>
+      {emissionsList[step]?.list[selectedEmissionIndex]?.dialogueOptions?.length > 0 ? (
+        emissionsList[step].list[selectedEmissionIndex].dialogueOptions.map((option, index) => (
+          <option key={index} value={option.value}>
+            {option.label}
+          </option>
+        ))
       ) : (
-        <option disabled selected>
-          No data
+        <option value="" disabled>
+          No data available
         </option>
       )}
-                </select>
-              </Grid>
-            )}
+    </select>
+  </Grid>
+)}
+
             <Grid item xs={12} md={12}>
               <Typography variant="h6" style={Styles.customTitle}>
                 Catégorie 2

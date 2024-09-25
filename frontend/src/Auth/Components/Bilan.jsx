@@ -350,7 +350,11 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                             },
                           }}
                           value={selectedDb}
-                          onChange={(e) => setSelectedDb(e.target.value)}
+                          onChange={(e) =>{ 
+                            setSelectedDb(e.target.value)
+                            localStorage.setItem("db_type",e.target.value)
+
+                          }}
                         >
                           <MenuItem disabled value="">
                             Selectionner DB type

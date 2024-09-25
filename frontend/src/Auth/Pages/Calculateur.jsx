@@ -113,7 +113,7 @@ function Calculateur() {
        
         console.log("transformedDbType 1",response.data.steps)
         setDbs_type1List(response.data.steps); 
-
+        
         setSteps(response.data.steps); 
         console.log("transformedDbType",steps)
         
@@ -378,6 +378,7 @@ function Calculateur() {
                         >
                           {steps.map((step, index) => 
                             {
+                              console.log("hjb",step)
                              
                             return (
                             <Step key={index}>
@@ -454,7 +455,7 @@ function Calculateur() {
         sheetNamem={steps[activeStep]}
       />
     </div>
- 
+
  
 
 
