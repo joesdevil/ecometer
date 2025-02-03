@@ -23,6 +23,9 @@ const emissionPostSchema = new mongoose.Schema({
   category: String,
   postName: String,
   scope: String,
+  scope1:Number,
+  scope2:Number,
+  scope3:Number,
   uncertainty: { type: Number, default: 0 },
   emissions: { type: Number, default: 0 }, // Default value is 0 for emissions
   // other gasses (CH4, N2O, CO2) default is "NC/0" (non calculé)
@@ -44,27 +47,30 @@ const carbonFootprintSchema = new mongoose.Schema({
   emissionPosts: [emissionPostSchema],
   totalUncertainty: { type: Number, default: 0 },
   year: { type: Number, default: currentYear },
+  scope1: { type: Number, default: 0 },
+  scope2: { type: Number, default: 0 },
+  scope3: { type: Number, default: 0 },
   totalEmissions: { type: Number, default: 0 },  
   createdAt: { type: Date, default: Date.now },  
 });
 
- 
 
 const bilansConnection = mongoose.createConnection(process.env.BILANS_URL);
-// Add error handling
+
+
 bilansConnection.on("error", console.error.bind(console, "connection error:"));
 bilansConnection.once("open", function () {
   console.log("Connected to Bilans database");
 });
 
-// Create model for carbon footprint
+
+
 const CarbonFootprint = bilansConnection.model(
   "CarbonFootprint",
   carbonFootprintSchema,
   "carbonFootprints"
 ); 
 
- 
 
 module.exports = {
   CarbonFootprint

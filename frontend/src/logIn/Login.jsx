@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import backg from "../../public/section-vector.png"
+import Navbar from "../landingPage/Navbar";
+
 function Login() {
   const [data, setData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -22,16 +25,37 @@ function Login() {
     try {
       const url = "http://localhost:3000/api/clients/login";
       const { data: res } = await axios.post(url, data);
-      localStorage.removeItem("token");
-      localStorage.setItem("token", res.token);
-      console.log(res);
-      const isAdmin = res.isAdmin;
-      localStorage.setItem("isConnected", true);
-      if(isAdmin){
-        navigate("/admin/utilisateurs");
-        return;
+      
+      if (res.clientId) {
+        await axios.get(`http://localhost:3000/api/clients/profile`, {
+          headers: {
+            'clientId': res.clientId,
+            'Authorization': `Bearer ${res.token}`
+          }
+        })
+          .then(response => {
+            console.log("respo-->",response)
+
+            localStorage.removeItem("token");
+            localStorage.setItem("token", res.token); 
+            localStorage.setItem("clientId", res.clientId);
+            localStorage.setItem("isConnected", true);
+                        
+            const isAdmin = response.data.isAdmin;
+            if(isAdmin){
+              // navigate("/admin/utilisateurs");
+              navigate("/calculateur");
+              return;
+            }
+            navigate("/rapport");
+            
+          })
+          .catch(error => {
+            console.error("There was an error fetching the client data!", error);
+          });
       }
-      navigate("/acceuil");
+      
+      
     } catch (error) {
       if (
         error.response &&
@@ -49,9 +73,11 @@ function Login() {
     }
   };
   return (
+
+    <><Navbar />
     <div className="realtive font-['Inter']">
       <img
-        src="/Vector2.svg"
+        src={backg}
         className="absolute max-w-full w-[100%]"
         alt="SVG Image"
       ></img>
@@ -60,18 +86,14 @@ function Login() {
           <div className="text-center text-neutral-800 h-[10vh] text-[4.8vh] font-bold font-['Eudoxus Sans'] pt-[4vh]">
             Se connecter
           </div>
-          <div className="text-center text-neutral-700 text-[2vh] font-medium font-['Eudoxus Sans']   pb-[7vh]">
-            Bon retour, ravi de vous revoir
-          </div>
+          <br /><br />
           {/* formulaire  */}
           <form className="" onSubmit={handleSubmit}>
             <div className="flex flex-col  justify-center items-center">
               <div
-                className={
-                  redEmail
-                    ? "w-[84%] h-[8vh] mb-[3vh]  px-5  rounded-[2vh] border border-red-500 flex-col justify-center items-start flex"
-                    : "w-[84%] h-[8vh] mb-[3vh]  px-5  rounded-[2vh] border border-slate-900 flex-col justify-center items-start flex"
-                }
+                className={redEmail
+                  ? "w-[84%] h-[8vh] mb-[3vh]  px-5  rounded-1vh] border border-red-500 flex-col justify-center items-start flex"
+                  : "w-[84%] h-[8vh] mb-[3vh]  px-5  rounded-[1vh] border border-slate-900 flex-col justify-center items-start flex"}
               >
                 <div className="  flex-col  justify-center  items-start flex">
                   <div className=" w-[50%] text-neutral-500  leading-none font-sans   text-[1.9vh] font-normal  ">
@@ -87,8 +109,7 @@ function Login() {
                         placeholder="exemple@domain.com"
                         onChange={handleChange}
                         value={data.email}
-                        required
-                      />
+                        required />
                     </div>
                   </div>
                   {error && (
@@ -100,11 +121,9 @@ function Login() {
               </div>
 
               <div
-                className={
-                  redPass
-                    ? "w-[84%] h-[8vh]  px-5  rounded-[2vh] border border-red-500"
-                    : "w-[84%] h-[8vh]  px-5  rounded-[2vh] border border-slate-900"
-                }
+                className={redPass
+                  ? "w-[84%] h-[8vh]  px-5  rounded-[1vh] border border-red-500"
+                  : "w-[84%] h-[8vh]  px-5  rounded-[1vh] border border-slate-900"}
               >
                 <div className=" w-[10%] float-right h-[100%] flex justify-center ">
                   <img
@@ -128,8 +147,7 @@ function Login() {
                         placeholder="Doit contenir au moins 8 caractères"
                         onChange={handleChange}
                         value={data.password}
-                        required
-                      />
+                        required />
                     </div>
                   </div>
                 </div>
@@ -139,8 +157,8 @@ function Login() {
                   {redEmail
                     ? "Cet Email n’exist pas"
                     : redPass
-                    ? "Mot de passe incorrect"
-                    : ""}
+                      ? "Mot de passe incorrect"
+                      : ""}
                 </div>
                 <a
                   href="/forgetpassword"
@@ -151,8 +169,8 @@ function Login() {
               </div>
               <div className="w-full">
                 <button type="submit" className="w-full">
-                  <div className="w-[84%] h-[8vh] hover:bg-[#023559] duration-[0.3s]   hover:rounded-[1.8vh]  bg-sky-950 rounded-[2vh] justify-center items-center gap-2.5 inline-flex">
-                    <div className="text-center text-white text-[3vh]  font-['Inter sans'] ">
+                  <div className="w-[84%] h-[5vh] hover:bg-[#023559] duration-[0.3s]      bg-sky-950 rounded-[1vh] justify-center items-center gap-2.5 inline-flex">
+                    <div className="text-center text-white text-[2vh]  font-['Inter sans'] ">
                       Se connecter
                     </div>
                   </div>
@@ -161,19 +179,19 @@ function Login() {
             </div>
           </form>
           <div className="flex justify-center mt-[4vh]">
-            <span className="text-neutral-800 text-[2.8vh]   ">
+            <span className="text-neutral-800 text-[1.8vh]   ">
               Vous n’avez pas encore de compte ?{" "}
             </span>
             <a href="/signup">
               {" "}
-              <span className="text-sky-600  text-[2.8vh]  ">
+              <span className="text-sky-600  text-[1.8vh]  ">
                 &nbsp;S’inscrire
               </span>
             </a>
           </div>
         </div>
       </div>
-    </div>
+    </div></>
   );
 }
 

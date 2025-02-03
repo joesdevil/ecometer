@@ -24,15 +24,35 @@ const registerClient = async (req, res) => {
   const {
     name,
     email,
-    password,
+    
     numberOfEmployees,
     industry,
     address,
     numberOfLocations,
     structure,
+    number,
+    purpose,
+    message,
+    conf1,
+    conf2,
     profilePicture,
   } = req.body;
 
+  function formatName(name) {
+    const noSpaces = name.replace(/\s+/g, ''); // Remove all whitespace
+    return noSpaces.charAt(0).toUpperCase() + noSpaces.slice(1).toLowerCase();
+} 
+ 
+  
+
+  function generateFourDigitNumber() {
+    return Math.floor(1000 + Math.random() * 9000);
+}
+
+const password = formatName(name) + generateFourDigitNumber();
+
+ 
+  console.log("code is ==>",password);
   console.log("sending body req")
   try {
     // Create a new client using Model.create()
@@ -53,6 +73,11 @@ const registerClient = async (req, res) => {
       address,
       numberOfLocations,
       structure,
+      number,
+      purpose,
+      message,
+      conf1,
+      conf2,
       profilePicture: {
         public_id: uploadedResponse.public_id,
         url: uploadedResponse.secure_url,
@@ -83,7 +108,7 @@ const registerClient = async (req, res) => {
       from: process.env.EMAIL_USER,
       to: newClient.email,
       subject: "Verify your email account",
-      html: emailVerificationTemplate(OTP),
+      html: emailVerificationTemplate(OTP,newClient._id),
     });
     const token = jwt.sign(
       { clientId: newClient._id, username: newClient.name },
@@ -101,8 +126,8 @@ const registerClient = async (req, res) => {
     });
   } catch (error) {
     // If an error occurs during validation or database operation, handle it
-    console.error("Error creating client:", error);
-    res.status(400).json({ error: error.message });
+    console.error("-->Error creating client:", error);
+    res.status(400).json({ error: error });
   }
 };
 
@@ -153,6 +178,7 @@ const loginClient = async (req, res) => {
     res.status(200).json({
       msg: "Login successful",
       token: token,
+      clientId: client ? client._id : null,
       isAdmin: isAdmin
     });
   } catch (error) {
@@ -164,10 +190,50 @@ const loginClient = async (req, res) => {
   }
 };
 
-const verifyEmail = async (req, res) => {
-  const { otp } = req.body;
-  const clientId = req.clientId;
 
+const reverifyClient = async(req,res)=>{
+  
+  try {
+    const clientId = req.body.clientId;
+  
+  const client = await Client.findById(clientId);
+  console.log("client",client)
+  // await Client.updateOne({ _id: client._id }, { verified: true });
+
+  // Generate a verification token
+  const OTP = generateOTP();
+  console.log("OTP",OTP)
+
+  const newVerificationToken = new VerificationToken({
+    owner: client._id,
+    token: OTP,
+  }); 
+
+  // Save the verification token to the database
+  await newVerificationToken.save(); 
+  mailTransport().sendMail({
+    from: process.env.EMAIL_USER,
+    to: client.email,
+    subject: "Verify your email account",
+    html: emailVerificationTemplate(OTP,clientId),
+  });
+
+  
+  return res.status(200).json({ msg: "otp message sent!" });
+    
+  } catch (error) {
+    return res.status(400).json({ msg: "error has occured!" });
+  }
+}
+
+
+const verifyEmail = async (req, res) => {
+ 
+  const otp = req.body.otp; 
+  const clientId = req.clientId || req.body.cId;
+   
+
+//Sifeddinesalem4145
   //otp should be a string
   if (!clientId || !otp.trim()) {
     return res.status(400).json({ msg: "Client ID and OTP are missing" });
@@ -185,15 +251,23 @@ const verifyEmail = async (req, res) => {
     return res.status(400).json({ msg: "Email already verified" });
   }
 
-  const verificationToken = await VerificationToken.findOne({
-    owner: clientId,
-  });
-  if (!verificationToken) {
+  const verificationTokens = await VerificationToken.find({ owner: clientId });
+
+  if (!verificationTokens.length) {
     return res.status(404).json({ msg: "Token not found" });
   }
 
-  const isMatched = await verificationToken.compareToken(otp);
-  if (!isMatched) {
+  // Check if the OTP matches any of the tokens
+  const matchedToken = await Promise.all(
+      verificationTokens.map(async (token) => {
+        const isMatched = await token.compareToken(otp);
+        return isMatched ? token : null;
+      })
+  );
+  // Filter out null values
+  const verificationToken = matchedToken.find((token) => token !== null);
+
+  if (!verificationToken) {
     return res.status(400).json({ msg: "Invalid OTP" });
   }
 
@@ -324,6 +398,8 @@ const getClientProfile = async (req, res) => {
   }
 };
 
+ 
+
 // update a clients profile
 const updateClientProfile = async (req, res) => {
   const {
@@ -334,6 +410,11 @@ const updateClientProfile = async (req, res) => {
     address,
     numberOfLocations,
     structure,
+    number,
+    purpose,
+    message,
+    conf1,
+    conf2,
   } = req.body;
   const clientId = req.clientId; // Added this line
 
@@ -347,6 +428,18 @@ const updateClientProfile = async (req, res) => {
       return res.status(404).json({ msg: "Client not found" });
     }
 
+
+    function formatNumber(number) {
+      const numberStr = number.toString(); // Convert the number to a string
+      if (numberStr.startsWith("213")) {
+          return "+" + numberStr;
+      } else {
+          return "0" + numberStr;
+      }
+  }
+
+    number=formatNumber(number);
+
     client.name = name;
     client.email = email;
     client.numberOfEmployees = numberOfEmployees;
@@ -354,6 +447,12 @@ const updateClientProfile = async (req, res) => {
     client.address = address;
     client.numberOfLocations = numberOfLocations;
     client.structure = structure;
+    client.number = number;
+    client.message = message;
+    client.purpose = purpose;
+    client.conf1 = conf1;
+    client.conf2 = conf2;
+    client.isAdmin = false;
 
     await client.save();
     return res.status(200).json(client);
@@ -426,11 +525,12 @@ module.exports = {
   registerClient,
   loginClient,
   verifyEmail,
-  forgotPassword,
+  forgotPassword, 
   resetPassword,
   getClientProfile,
   updateClientProfile,
   deleteClient,
   updateClientPassword,
   getAllClients,
+  reverifyClient
 };

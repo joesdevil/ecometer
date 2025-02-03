@@ -499,7 +499,7 @@ function Energie() {
                 }}
               >
                 <FormControl>
-                  <FormLabel>Emissions Fe</FormLabel>
+                  <FormLabel>Emissions Feb</FormLabel>
                   <RadioGroup
                     aria-labelledby="demo-radio-buttons-group-label"
                     defaultValue={""} // Assuming selectedOption is the state for the selected radio button

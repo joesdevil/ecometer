@@ -3,12 +3,12 @@ import Ecometer from './Ecometer'
 function Foot() {
   return (
     <React.Fragment>
-      <div className="relative  w-[100%] h-[80vh] ">
-        <img
+      <div className="relative  w-[100%] h-[80vh]  bg-[#0F172A]">
+        {/* <img
           src="/Vector13.svg"
           className="absolute  max-h-full w-[100%] max-w-full "
-        ></img>
-        <div className=" absolute bg-[#0F172A] w-full h-[55%] bottom-[0%] "></div>
+        ></img> */}
+        <div className=" absolute  w-full h-[55%] bottom-[0%] "></div>
 
         <div className="absolute flex flex-col  items-center w-full h-full ">
           <div className=" absolute w-[95%] bottom-[12%] h-[60%] flex flex-col  items-center">
@@ -279,7 +279,7 @@ function Foot() {
                   href="/#"
                   className="no-underline text-white font-extralight text-[2.1vh] visited:text-[rgba(242,243,239,0.315)"
                 >
-                  CameraWW @ 2024
+                  CameraWW @ 2025
                 </a>
                 <a
                   href="/#"

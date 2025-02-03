@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../landingPage/Navbar";
+import backg from "../../public/section-vector.png"
 
 function Forgetpassword() {
   const [data, setData] = useState({ email: "" });
@@ -21,9 +23,14 @@ function Forgetpassword() {
   };
 
   return (
+
+    
+
+    <>
+    <Navbar />
     <div className="realtive font-['Inter']">
       <img
-        src="/Vector2.svg"
+        src={backg}
         className="absolute max-w-full w-[100%]"
         alt="SVG Image"
       ></img>
@@ -53,8 +60,7 @@ function Forgetpassword() {
                       placeholder="exemple@domain.com"
                       onChange={handleChange}
                       value={data.email}
-                      required
-                    />
+                      required />
                   </div>
                 </div>
               </div>
@@ -71,11 +77,10 @@ function Forgetpassword() {
                 </div>
               </div>
             </button>
-            <a href="/verf">aaa</a>
           </form>
         </div>
       </div>
-    </div>
+    </div></>
   );
 }
 

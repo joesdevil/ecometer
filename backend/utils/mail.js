@@ -19,7 +19,7 @@ nodemailer.createTransport({
   }
   });
 
-  const emailVerificationTemplate = (otp) => `
+  const emailVerificationTemplate = (otp,clientId) => `
   <html lang="en">
   <head>
       <meta charset="UTF-8">
@@ -32,6 +32,7 @@ nodemailer.createTransport({
           <h2 style="color: #333;">Welcome to Our Community!</h2>
           <p style="color: #666;">Dear New Member,</p>
           <p style="color: #666;">We are thrilled to have you join our community. To get started, please verify your email address by entering the OTP code below:</p>
+          <a href='http://localhost:5173/verf?cId=${clientId}'>validate your account</a>
           <h3 style="color: #007bff;">${otp}</h3>
           <p style="color: #666;">This code will expire in a short while, so please complete the verification process promptly.</p>
           <p style="color: #666;">If you didn't sign up for our community, please disregard this email.</p>
@@ -86,6 +87,7 @@ const emailVerifiedTemplate = () =>
     <p>Your email address has been successfully verified. You can now enjoy full access to our platform.</p>
     <p>If you have any questions or need further assistance, feel free to contact us.</p>
     <p>Thank you!</p>
+    
   </div>
 </body>
 </html>

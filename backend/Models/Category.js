@@ -17,6 +17,9 @@ const ModelElementSchema = new Schema({
   dbName: {  // Replaces IdentifiantElement
     type: String,
   },
+  scope: {  // Replaces IdentifiantElement
+    type: Number,
+  },
   methode: {
     type: Object,
     required: [true, 'Methode field is required']
@@ -131,6 +134,10 @@ const CategoryElementSchema = new Schema({
       type: Number,
       required: [false, 'totalPostValue field is required']
     },
+    scope:{
+      type: Number,
+      default: 1
+    },
     // 
   });
 
@@ -161,6 +168,10 @@ const CategoryElementSchema2 = new Schema({
   },
   
   "Total poste non décomposé":{  // Replaces Type Poste
+    type: Number,
+    default: null,
+  },
+  scope:{  // Replaces Type Poste
     type: Number,
     default: null,
   },
@@ -225,7 +236,7 @@ const AchatsDeServices = categoriesConnection.model('AchatsDeServices', Category
 
 const Combustibles = categoriesConnection.model('Combustibles', CategoryElementSchema, 'combustibles');
 
-const ProcessEtEmissionFugitives = categoriesConnection.model('ProcessEtEmissionFugitives', CategoryElementSchema, 'processetemissionsfugitives');
+const ProcessEtEmissionsFugitives = categoriesConnection.model('ProcessEtEmissionsFugitives', CategoryElementSchema, 'processetemissionsfugitives');
 
 const Electricite = categoriesConnection.model('Electricite', CategoryElementSchema, 'electricite');
 
@@ -243,8 +254,8 @@ const ElectriciteParPays = categoriesConnection.model('ElectriciteParPays', Cate
 const UTCF = categoriesConnection.model('UTCF', CategoryElementSchema, 'utcf');
 
 // agribalyse
-const Produitsalimentaires = categoriesConnection2.model('Produitsalimentaires', CategoryElementSchema2, 'produitsalimentaires');
-const Produitsagricoles = categoriesConnection2.model('Produitsagricoles', CategoryElementSchema2, 'produitsagricoles'); 
+const ProduitsAlimentaires = categoriesConnection2.model('ProduitsAlimentaires', CategoryElementSchema2, 'produitsalimentaires');
+const ProduitsAgricoles = categoriesConnection2.model('ProduitsAgricoles', CategoryElementSchema2, 'produitsagricoles'); 
 
 
 
@@ -253,7 +264,7 @@ module.exports = {
     AchatsDeBiens,
     AchatsDeServices,
     Combustibles,
-    ProcessEtEmissionFugitives,
+    ProcessEtEmissionsFugitives,
     Electricite,
     ElectriciteParPays,
     ReseauxDeChaleurEtFroid,
@@ -262,8 +273,8 @@ module.exports = {
     TransportDeMarchandises,
     TransportDePersonnes,
     UTCF,
-    Produitsalimentaires,
-    Produitsagricoles, 
+    ProduitsAlimentaires,
+    ProduitsAgricoles, 
     ModelDB,
     categoriesConnection,
     categoriesConnection2, 

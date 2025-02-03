@@ -171,7 +171,7 @@ const TransportCard = () => {
                       post4.total +
                       post5.total)
                   ).toFixed(3)}{" "}
-                  kg CO2e
+                  kg CO2
                 </Typography>
               </Grid>
             </Grid>

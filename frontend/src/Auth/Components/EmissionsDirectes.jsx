@@ -344,10 +344,13 @@ function EmissionsDirectes({step}) {
     setQuantité(Number(e.target.value)); //
   };
  
-  const handleSave = async (sheetname) => {
+  const handleSave = async (sheetname,unité="") => {
     console.log("sheetname",sheetname)
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
     console.log("bilan", bilan);
+    if(unité=="keuro"){
+      setQuantité(Quantité/250)
+    }
     bilan.selectedCategoryElements.push({
       category:sheetname.replaceAll(" ",""),
       sheetName:sheetname,
@@ -433,7 +436,10 @@ function EmissionsDirectes({step}) {
                                  style={{ marginTop: "-8px" }}
                                >
                                  <Typography style={Styles.contenuEtape}>
-                                    Quantité  
+                               {option.split("->")[1].trim() === "keuro" 
+                              ? "Quantité en DA" 
+                              : "Quantité en " + option.split("->")[1]}
+
                                  </Typography>
                                </Grid>
                                { option.split(",")[3]=="ratio de charge" ? 
@@ -465,7 +471,8 @@ function EmissionsDirectes({step}) {
                                  <Button
                                    variant="contained"
                                    href="#contained-buttons"
-                                   onClick={()=>{handleSave(produit.dialogueOptions[0].value)}}
+                                  //  onClick={handleSave(produit.dialogueOptions[0].value)}
+                                   onClick={() => handleSave(produit.dialogueOptions[0].value,option.split("->")[1])}
                                  >
                                    save
                                  </Button>
@@ -499,7 +506,8 @@ function EmissionsDirectes({step}) {
                                <Button
                                  variant="contained"
                                  href="#contained-buttons"
-                                 onClick={handleSave(produit.dialogueOptions[0].value)}
+                                //  onClick={handleSave(produit.dialogueOptions[0].value)}
+                                onClick={() => handleSave(produit.dialogueOptions[0].value)}
                                >
                                  save
                                </Button>
@@ -536,7 +544,8 @@ function EmissionsDirectes({step}) {
                                  <Button
                                    variant="contained"
                                    href="#contained-buttons"
-                                   onClick={handleSave(produit.dialogueOptions[0].value)}
+                                  //  onClick={handleSave(produit.dialogueOptions[0].value)}
+                                  onClick={() => handleSave(produit.dialogueOptions[0].value,option.split("->")[1])}
                                  >
                                    save
                                  </Button>
@@ -573,7 +582,8 @@ function EmissionsDirectes({step}) {
                                  <Button
                                    variant="contained"
                                    href="#contained-buttons"
-                                   onClick={handleSave(produit.dialogueOptions[0].value)}
+                                  //  onClick={handleSave(produit.dialogueOptions[0].value)}
+                                  onClick={() => handleSave(produit.dialogueOptions[0].value)}
                                  >
                                    save
                                  </Button>
@@ -730,7 +740,7 @@ function EmissionsDirectes({step}) {
                                 dbs_type["display"] && Object.keys(dbs_type["display"][item.categories[0]]) ? // Check if dbs_type["display"] is an array
                                 Object.keys(dbs_type["display"][item.categories[0]])
                                     .map((db) => item[db]) // Map over dbs_type["display"] to get the values
-                                    .join(" , ") // Join the mapped array into a single string
+                                    .join(" , ") + ` -> ${item["Unité français"]?item["Unité français"]=="keuro"?"DA":item["Unité français"].split("/")[1] : ''}` // Join the mapped array into a single string
                                 : "Invalid Display Type" // Fallback if display is not an array
                               }
                             />

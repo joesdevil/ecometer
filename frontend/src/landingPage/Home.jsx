@@ -17,15 +17,13 @@ localStorage.removeItem("token");
     <section>
       <Navbar />
       <Hero />
-      <Sectionii />
-      <Video />
-      <Info />
-      <Stat />
-      <Questions />
-      <Last />
+      
       <Foot />
     </section>
   );
 }
 
 export default Landing;
+
+
+

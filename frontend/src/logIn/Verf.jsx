@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-
+import Navbar from "../landingPage/Navbar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,7 @@ import { MuiOtpInput } from "mui-one-time-password-input";
 import { toast } from 'react-toastify';
 import {  CircularProgress } from "@mui/material";
 
+import backg from "../../public/section-vector.png"
 
 function Verf() {
   const [otp, setOtp] = React.useState("");
@@ -37,20 +38,22 @@ function Verf() {
     setLoading(true)
     try {
       // Set the Authorization header with the token
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
       
 
-      const response = await axios.post(
-        "http://localhost:3000/api/clients/verify-email",
-        { otp: otp },
-        { headers: headers }
+      
+      const params = new URLSearchParams(window.location.search);
+      const cId = params.get("cId");
+       
+      console.log("otp---",otp)
+      const response = await axios.post("http://localhost:3000/api/clients/verify-email",
+        { otp: otp,
+          cId: cId
+          }
       );
       console.log("verification response:", response.data);
       localStorage.setItem("verifiedEmail", true);
       setLoading(false)
-      navigate("/acceuil");
+      navigate("/thankyou");
     } catch (error) {
       // Handle any errors
       console.error("Error during verification:", error);
@@ -60,9 +63,10 @@ function Verf() {
   };
   const [loading, setLoading] = useState(false);
   return (
-    <div className="realtive font-['Inter']">
+
+    <><Navbar /><div className="realtive font-['Inter']">
       <img
-        src="/Vector2.svg"
+        src={backg}
         className="absolute max-w-full w-[100%]"
         alt="SVG Image"
       ></img>
@@ -82,8 +86,7 @@ function Verf() {
               length={6}
               value={otp}
               onChange={handleChange}
-              validateChar={validateChar}
-            />
+              validateChar={validateChar} />
           </div>
 
           <div className="h-[10%] text-orange flex justify-center items-center leading-9"></div>
@@ -110,11 +113,11 @@ function Verf() {
               </a>
             </div>
           </button>
-          
+
         </div>
       </div>
-      
-    </div>
+
+    </div></>
   );
 }
 

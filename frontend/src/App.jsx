@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Home from "./landingPage/Home";
+import Func from "./landingPage/Func";
+import Faq from "./landingPage/Faq";
+import Propos from "./landingPage/Propos";
+
 import Login from "./logIn/Login";
 import Signup from "./signUp/Signup";
 import Calculateur from "./Auth/Pages/Calculateur.jsx";
@@ -16,6 +20,10 @@ import ModifierCollection from "./admin/pages/ModifierCollection.jsx";
 import "./App.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ThankYou from "./logIn/thankyou.jsx";
+import QuestionsClients from "./Auth/Pages/QuestionsClients.jsx";
+import Clients from "./Auth/Pages/Clients.jsx";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,18 +65,22 @@ function App() {
           <ThemeProvider theme={theme}>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/fonctionnement" element={<Func />} />
+              <Route path="/propos" element={<Propos />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgetpassword" element={<Forgetpassword />} />
               <Route path="/verf" element={<Verf />} />
-              <Route
+              <Route path="/thankyou" element={<ThankYou />} />
+              {/* <Route
                 path="/acceuil"
                 element={
                   <RequireAuth>
                     <Acceuil />
                   </RequireAuth>
                 }
-              />
+              /> */}
 
               <Route
                 path="/uploadDB"
@@ -87,6 +99,24 @@ function App() {
                   </RequireAuth>
                 }
               />
+               <Route
+                path="/Questions"
+                element={
+                  <RequireAuth>
+                    <QuestionsClients />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/Clients"
+                element={
+                  <RequireAuth>
+                    <Clients />
+                  </RequireAuth>
+                }
+              />
+
               <Route
                 path="/rapport"
                 element={

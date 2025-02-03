@@ -56,6 +56,7 @@ function Acceuil() {
 
       console.log("Client Profile Data:", response.data);
       localStorage.removeItem("client");
+      localStorage.setItem("clientId",response.data["clientId"])
       localStorage.setItem("client", JSON.stringify(response.data));
       return response.data;
     } catch (error) {

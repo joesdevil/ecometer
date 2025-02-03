@@ -4,7 +4,7 @@ const {
   AchatsDeBiens,
   AchatsDeServices,
   Combustibles,
-  ProcessEtEmissionFugitives,
+  ProcessEtEmissionsFugitives,
   Electricite,
   ElectriciteParPays,
   ReseauxDeChaleurEtFroid,
@@ -13,8 +13,8 @@ const {
   TransportDeMarchandises,
   TransportDePersonnes,
   UTCF,
-  Produitsagricoles,
-  Produitsalimentaires,
+  ProduitsAgricoles,
+  ProduitsAlimentaires,
   categoriesConnection,
   categoriesConnection2
 } = require("../Models/Category");

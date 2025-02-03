@@ -596,7 +596,7 @@ function ProduitsAchetes() {
                 }}
               >
                 <FormControl>
-                  <FormLabel>Emissions Fe</FormLabel>
+                  <FormLabel>Emissions Fne</FormLabel>
                   <RadioGroup
                     aria-labelledby="demo-radio-buttons-group-label"
                     defaultValue={""} // Assuming selectedOption is the state for the selected radio button

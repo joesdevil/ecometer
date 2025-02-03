@@ -14,13 +14,13 @@ const FixedPosteAttributs = [
   {
     index: "1.3",
     postName: "Emissions directes des procédés hors énergie",
-    category: "ProcessEtEmissionFugitives",
+    category: "ProcessEtEmissionsFugitives",
     Scope: "1",
   },
   {
     index: "1.4",
     postName: "Emissions directes fugitives",
-    category: "ProcessEtEmissionFugitives",
+    category: "ProcessEtEmissionsFugitives",
     Scope: "1",
   },
   {
@@ -135,13 +135,13 @@ const FixedPosteAttributs = [
   {
     index: "6.1",
     postName: "Produits alimentaires",
-    category: "Produitsalimentaires",
+    category: "ProduitsAlimentaires",
     Scope: "3",
   },
   {
     index: "6.2",
     postName: "Produits agricoles",
-    category: "Produitsagricoles",
+    category: "ProduitsAgricoles",
     Scope: "3",
   },
   
@@ -151,7 +151,7 @@ const validCategories = [
   "AchatsDeBiens",
   "AchatsDeServices",
   "Combustibles",
-  "ProcessEtEmissionFugitives",
+  "ProcessEtEmissionsFugitives",
   "Electricite",
   "ElectriciteParPays",
   "ReseauxDeChaleurEtFroid",
@@ -160,7 +160,7 @@ const validCategories = [
   "TransportDeMarchandises",
   "TransportDePersonnes",
   "UTCF",
-  "Produitsagricoles",
-  "Produitsalimentaires",
+  "ProduitsAgricoles",
+  "ProduitsAlimentaires",
 ];
 module.exports = { FixedPosteAttributs , validCategories}

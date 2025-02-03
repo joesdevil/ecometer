@@ -1,12 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const xlsx = require('xlsx');
-
+const fs = require('fs'); 
 const {
   AchatsDeBiens,
   AchatsDeServices,
   Combustibles,
-  ProcessEtEmissionFugitives,
+  ProcessEtEmissionsFugitives,
   Electricite,
   ElectriciteParPays,
   ReseauxDeChaleurEtFroid,
@@ -101,17 +101,19 @@ async function getNextLevelCategories(userSelectedCategories) {
     case "Achatsdeservices":
       Model = categoriesConnection.model("AchatsDeServices");
       break;
-    case "Electricité":
+    case "Electricite":
       Model = categoriesConnection.model("Electricite");
       break;
-    case "Electricité":
-      Model = categoriesConnection.model("ElectriciteParPays");
+    case "Électricité":
+      Model = categoriesConnection.model("Electricite");
       break;
     case "Processetémissionsfugitives":
-      Model = categoriesConnection.model("ProcessEtEmissionFugitives");
+      Model = categoriesConnection.model("ProcessEtEmissionsFugitives");
       break;
-    case "Réseauxdechaleur/froid":
+    case "Réseauxdechaleuretfroid":
       Model = categoriesConnection.model("ReseauxDeChaleurEtFroid");
+      // remove this line next time
+      userSelectedCategories[0]="Réseaux de chaleur / froid"
       break;
     case "Statistiquesterritoriales":
       Model = categoriesConnection.model("StatistiquesTerritoriales");
@@ -130,11 +132,12 @@ async function getNextLevelCategories(userSelectedCategories) {
       break;
     // agribalyse
     case "Produitsalimentaires": 
-      Model = categoriesConnection2.model("Produitsalimentaires");
+      console.log("pss")
+      Model = categoriesConnection2.model("ProduitsAlimentaires");
       break; 
       
     case "Produitsagricoles": 
-      Model = categoriesConnection2.model("Produitsagricoles");
+      Model = categoriesConnection2.model("ProduitsAgricoles");
       break;
       
 
@@ -151,15 +154,19 @@ async function getNextLevelCategories(userSelectedCategories) {
 
   // Query MongoDB using Mongoose to find next level categories
  
-
+  userSelectedCategories[0]=userSelectedCategories[0].replace("É","E")
   const matchingDocuments = await Model.find({
     categories: { $all: userSelectedCategories },
   }); 
 
-
+  Model.find({}).then((results) => {
+    console.log("result-->",results.length); // Output: Number of documents
+  }).catch((error) => {
+      console.error(error);
+  });
   console.log("userSelectedCategories",userSelectedCategories)
 
-  console.log("matchingDocuments",matchingDocuments.length)
+  console.log("matchingDocuments ->",matchingDocuments.length) 
   // Extract next level categories from matching documents
  
     matchingDocuments.forEach((doc) => {  
@@ -310,17 +317,35 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Define the upload route
-async function uploadExcelToMongo(req, res){
-
-
+async function uploadExcelToMongo(req, res) {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
 
   const filePath = path.join(__dirname, '../uploads', req.file.filename);
+  const fileExtension = path.extname(req.file.originalname).toLowerCase();
 
   try {
-    // Read the Excel file
+    // Check if the uploaded file is a PDF
+    if (fileExtension === '.pdf') {
+      // Move PDF file to the static folder
+      const staticFolderPath = path.join(__dirname, '../uploads'); // Or wherever you want to store PDFs
+      const newFilePath = path.join(staticFolderPath, req.file.filename);
+
+      // Ensure the static folder exists, if not create it
+      if (!fs.existsSync(staticFolderPath)) {
+        fs.mkdirSync(staticFolderPath, { recursive: true });
+      }
+
+      // Move the file to the static folder
+      fs.renameSync(filePath, newFilePath);
+
+      // Respond with a success message and the new file path
+      res.json({ message: 'PDF file uploaded successfully', type: 'notice', filePath: newFilePath });
+      return;
+    }
+
+    // Process Excel file (if not PDF)
     const workbook = xlsx.readFile(filePath);
 
     // Initialize an object to store headers for each sheet
@@ -342,72 +367,46 @@ async function uploadExcelToMongo(req, res){
       }
     });
 
+    // Create a new document based on the request body
+    const modelToSave = new ModelDB({
+      methode: {},
+      display: {},
+      dbName: req.file.filename.replace(".xlsx", ""),
+      headers: allHeaders,
+      scope:0,
+      steps: {}
+    });
 
-     
-
-      // Create a new document based on the request body
-      const modelToSave = new ModelDB({
-        methode:{},
-        display:{},
-        dbName:req.file.filename.replace(".xlsx",""),
-        headers:allHeaders,
-        steps:{}
-
-      }); // You don't need to wrap `req` in the object
-  
-      // Save the document to the database
-      const savedModel = await modelToSave.save();
+    // Save the document to the database
+    const savedModel = await modelToSave.save();
 
     // Retrieve the ID of the saved document
     const id = savedModel._id;
 
-  
-      console.log("modelToSave._id ",id.toString()  )
-  
+    console.log("modelToSave._id ", id.toString());
 
+    // Execute Python script for further processing (if needed)
+    const mongoUri = 'mongodb://localhost:27017/';
 
- 
-    // Send all headers as the response
-    
+    if (fileExtension === '.xlsx') {
+      exec(`python upload_to_mongo.py "${filePath}" "${mongoUri}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing script: ${error.message}`);
+          return res.status(500).send('Error processing file.');
+        }
+        if (stderr) {
+          console.error(`Script stderr: ${stderr}`);
+          return res.status(500).send('Error processing file.');
+        }
 
-
-   
-  
-
-  const fileExtension = path.extname(req.file.originalname).toLowerCase(); 
-
-  const mongoUri = 'mongodb://localhost:27017/';
-
-  console.log("fileExtension",fileExtension)
-
-  if(fileExtension==".pdf"){
-    console.log("fileExtension",fileExtension)
-
-    res.json({ message: 'Notice File uploaded successfully', type: "notice" });
-  }else{
-    exec(`python upload_to_mongo.py "${filePath}" "${mongoUri}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error executing script: ${error.message}`);
-      return res.status(500).send('Error processing file.');
+        res.json({ message: 'File uploaded successfully', id: id.toString() });
+      });
     }
-    if (stderr) {
-      console.error(`Script stderr: ${stderr}`);
-      return res.status(500).send('Error processing file.');
-    }
-  
-    res.json({ message: 'File uploaded successfully', id: id.toString() });
-    
-  });
-}
-
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).json({ message: 'Error processing file', error: error.message });
   }
-  // Call the Python script
-  
-  
-};
+}
 
 
 module.exports = { getCategoryElements,uploadExcelToMongo,createModelDb ,getModelDb,updateModelDb,getModelsDb,getModelDbByName};

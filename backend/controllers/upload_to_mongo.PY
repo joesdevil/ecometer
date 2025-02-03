@@ -16,7 +16,7 @@ def upload_excel_to_mongodb(excel_file_path, mongo_uri):
     db = client['ecometer']
     db_categories = client['categories']
 
-    # Iterate through each sheet and insert the data into separate collections
+   
     for sheet_name, df in excel_data.items():
         print(f"Processing sheet: {sheet_name}...")
         

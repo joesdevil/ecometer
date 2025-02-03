@@ -17,7 +17,7 @@ router.post("/create-bilan", createBilan);
 
 // get requests
 
-router.get("/:clientId/:year", getBilan);
+router.get("/getBilan/:clientId/:year", getBilan);
 router.get("/all", getAllBilans);
 
 // delete requests

@@ -92,12 +92,60 @@ function Calculateur() {
 
 
 
+  const handleCheckPath = async () => {
+    console.log("checked")
+     
+    try {
+      if (localStorage.getItem("clientId")) {
+        const clientId = localStorage.getItem("clientId");
+        const token = localStorage.getItem("token");
+        
+        await axios.get(`http://localhost:3000/api/clients/profile`, {
+          headers: {
+            'clientId': clientId,
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => {
+             console.log("chheck")            
+             const isAdmin = response.data.isAdmin;
+            if(isAdmin){
+              // navigate("/admin/utilisateurs");
+              navigate("/calculateur");
+              return;
+            }
+            navigate("/rapport");
+            
+          })
+          .catch(error => {
+            console.error("There was an error fetching the client data!", error);
+          });
+      }
+      
+      
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        setError(error.response.data.message);
+
+        if (error.response.status === 404) {
+          setRedEmail(true);
+        } else if (error.response.status === 401) {
+          setRedPass(true);
+        }
+      }
+    }
+  };
  
 
   const [dbs_type1,setDbs_type1]=useState([])
   const [dbs_type1List,setDbs_type1List]=useState([])
   const [steps,setSteps]=useState([])
   useEffect(() => {
+    handleCheckPath()
     // Define the async function to fetch data
     const fetchHeaders = async () => {
       try {
@@ -266,14 +314,16 @@ function Calculateur() {
   const handleReset = async () => {
     setLoading(true)
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
+
+    // {"year":2025,"clientId":"66661fd621a877d16ef65508","selectedCategoryElements":[{"category":"Combustibles","sheetName":"Combustibles","quantity":555,"categoryElement":"6749a574b7f1ad30a89a4495"}]}'
     console.log("handleReset bilan",bilan)
+    bilan["clientId"]=localStorage.getItem("clientId")
     const token = localStorage.getItem("token");
     
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-      
-      
+       
       const url = `http://localhost:3000/api/bilans/calculateBilan/${selectedDB}`;
       
       const url1 = "http://localhost:3000/api/bilans/create-bilan";
@@ -289,6 +339,9 @@ function Calculateur() {
       }
        
     
+     
+
+
   };
   function allArraysEmpty(arrays) {
     return arrays.every(array => array.length === 0);

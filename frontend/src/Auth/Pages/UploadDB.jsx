@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import {  CircularProgress } from "@mui/material";
+
 import {
   Grid,
   Typography,
@@ -10,6 +11,8 @@ import {
   Button,
   Box,
   Stepper,
+  MenuItem,
+  Select,
   Step,
   StepLabel,
 } from "@mui/material";
@@ -31,9 +34,9 @@ import { toast } from 'react-toastify';
 
 const steps =[
     
-  { label: "Display & name", icon: 8, backgroundColor: "#C1CDE0" },
-   { label: "Method calculation", icon: 7, backgroundColor: "#C1CDE0" },
-   { label: "Steps", icon: 9, backgroundColor: "#C1CDE0" },
+  { label: "Affichage", icon: 8, backgroundColor: "#C1CDE0" },
+   { label: "Method de calculation", icon: 7, backgroundColor: "#C1CDE0" },
+   { label: "etapes", icon: 9, backgroundColor: "#C1CDE0" },
     
   ]
 
@@ -103,6 +106,54 @@ const id = localStorage.getItem("last_uploaded_db_id")
 function Calculateur() {
 
 
+  const handleCheckPath = async () => {
+    console.log("checked")
+     
+    try {
+      if (localStorage.getItem("clientId")) {
+        const clientId = localStorage.getItem("clientId");
+        const token = localStorage.getItem("token");
+        
+        await axios.get(`http://localhost:3000/api/clients/profile`, {
+          headers: {
+            'clientId': clientId,
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => { 
+                 
+             const isAdmin = response.data.isAdmin;     
+             if(!isAdmin){
+              // navigate("/admin/utilisateurs");
+              navigate("/rapport");
+              return;
+            } 
+            
+          })
+          .catch(error => {
+            console.error("There was an error fetching the client data!", error);
+          });
+      }
+      
+      
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        setError(error.response.data.message);
+
+        if (error.response.status === 404) {
+          setRedEmail(true);
+        } else if (error.response.status === 401) {
+          setRedPass(true);
+        }
+      }
+    }
+  };
+
+
   const [sheetsInfos, setSheetsInfos] = useState({
     headers: {}, // Placeholder for headers
     steps: [
@@ -116,6 +167,8 @@ function Calculateur() {
   const [showBilan, setShowBilan] = useState(false);
   
   useEffect(() => {
+
+    handleCheckPath()
 
     const id = localStorage.getItem("last_uploaded_db_id")
     
@@ -209,6 +262,15 @@ function Calculateur() {
       dbName: e.target.value
     });
   };
+  const handleScopeChange = (e) => {
+    
+    setSelectedScope(e.target.value)
+    setSheetsInfos({
+      ...sheetsInfos,
+      scope: e.target.value
+    });
+    console.log("scope",sheetsInfos)
+  };
 
   const handleCheckboxChange = (e, sheetName) => {
     const { name, checked } = e.target;
@@ -251,6 +313,7 @@ function Calculateur() {
 
   const [activeSheet, setActiveSheet] = useState(null);
   const [expressions, setExpressions] = useState({});
+  const [selectedScope, setSelectedScope] = useState("");
  
   const handleItemClick = (header) => {
     setExpressions((prevExpressions) => ({
@@ -441,7 +504,7 @@ function Calculateur() {
             xs={12}
             sx={{ fontFamily: "Inter, sans-serif" }}
           >
-            <AppBarComponent title="Upload Data base" />
+            <AppBarComponent title="Télécharger la base de données" />
           </Grid>
           {showBilan && (
             <Grid
@@ -542,12 +605,12 @@ function Calculateur() {
 
 {sheetsInfos && sheetsInfos.headers && Object.keys(sheetsInfos.headers).length > 0 && (
   <div>
-    <h1>Sheet Headers</h1>
+    <h1 style={{fontSize:25+'px !important'}}>En-têtes de feuille</h1>
     {Object.entries(sheetsInfos.headers).map(([sheetName, headers]) => (
       <div key={sheetName}>
         <h2>{sheetName}</h2>
         {headers && headers.length > 0 ? (
-          <form>
+              <form style={{background: "rgba(249, 242, 242, 0.29)",marginBottom:20+'px', padding: "20px", borderRadius: "5px"}}>
             {headers.map((header, index) => (
               <div key={index}>
                 <input
@@ -575,9 +638,9 @@ function Calculateur() {
     <>
     {Object.keys(sheetsInfos.headers).length > 0 && (
       <>
-        <h1>Sheet Headers</h1>
+        <h1 style={{fontSize:25+'px !important'}}>En-têtes de feuille</h1>
         {Object.entries(sheetsInfos.headers).map(([sheetName, headers]) => (
-          <div key={sheetName}>
+          <div key={sheetName} style={{background: "#ccc !important", padding: "10px", borderRadius: "5px"}} >
             <h2 style={{fontSize:20+"px"}}>
               <button onClick={() => handleSheetSelect(sheetName)}>
                 {sheetName}
@@ -585,7 +648,43 @@ function Calculateur() {
             </h2>
             {sheetName === activeSheet && headers && headers.length > 0 ? (
               <>
-                <form>
+                 <Select
+                            fullWidth
+                            sx={{
+                              borderRadius: "15px",
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                              "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                            }}
+                            value={selectedScope}
+                            onChange={(e) => handleScopeChange(e)}
+                          >
+                            <MenuItem disabled value="">
+                              Selectionner Scope
+                            </MenuItem>
+                            <MenuItem key={1} value={1}>
+                              1
+                              </MenuItem>
+
+                              <MenuItem key={2} value={2}>
+                               2
+                              </MenuItem>
+                           
+                              <MenuItem key={3} value={3}>
+                               3
+                              </MenuItem>
+                        
+                          </Select>
+              <form >
                 <button
                       className="border ml-2 mb-1"
                       style={{ minWidth: '50px', padding: 5 }}
@@ -683,17 +782,26 @@ function Calculateur() {
                       {Object.keys(sheetsInfos.headers).length > 0 && (
                         <div>
                           <div>
-                            <h2>Steps</h2>
+                           
                     
                             {sheetsInfos.steps?.map((step, stepIndex) => {
-                              console.log("atn", sheetsInfos.steps);
+                           
                               return (
-                                <div key={stepIndex}>
+                                <div key={stepIndex} style={{background:'rgba(249, 242, 242, 0.29)',marginBottom:20+'px'}}>
                                   <h3>Step {stepIndex + 1}</h3>
                     
                                   {/* Step Label Input */}
                                   <input
                                     className="text-[2.6vh] border font-sans outline-none focus:border-none focus:outline-none"
+                                    fullWidth
+                                    style={{
+                                      width:400 + 'px',
+                                      height:50+'px',
+                                      background:"#eef5fc",
+                                      borderRadius:8+'px',
+                                      padding:5 + 'px',
+                                      outline:"none"
+                                    }}
                                     type="text"
                                     name="stepLabel"
                                     placeholder="Step Label"
@@ -713,6 +821,15 @@ function Calculateur() {
                                           {/* Input for List Item Label */}
                                           <input
                                             className="text-[2.6vh] border font-sans outline-none focus:border-none focus:outline-none"
+                                            fullWidth
+                                            style={{
+                                              width:400 + 'px',
+                                              height:50+'px',
+                                              background:"#eef5fc",
+                                              borderRadius:8+'px',
+                                              padding:5 + 'px',
+                                              outline:"none"
+                                            }}
                                             type="text"
                                             name="listItemLabel"
                                             placeholder="List Item Label"
@@ -726,6 +843,15 @@ function Calculateur() {
                                           {/* Display dialogue options */}
                                           <p>Dialogue Option:</p>
                                           <select
+                                          fullWidth
+                                          style={{
+                                            width:400 + 'px',
+                                            height:50+'px',
+                                            background:"#eef5fc",
+                                            borderRadius:8+'px',
+                                            padding:5 + 'px',
+                                            outline:"none"
+                                          }}
                                             value={listItem.dialogueOptions?.[0]?.value ?? ""}
                                             onChange={(e) =>
                                               handleSelectedOptionsChange(stepIndex, itemIndex, e.target.value)
@@ -756,15 +882,37 @@ function Calculateur() {
                                   )}
                     
                                   {/* Button to add a new list item within this step */}
-                                  <button type="button" onClick={() => handleAddListItem(stepIndex)}>
+                                  <button type="button" onClick={() => handleAddListItem(stepIndex)} style={{
+                                    
+                                      background: "#405cf5",
+                                      borderRadius: 6+'px',
+                                      marginTop:10+"px",
+                                      color: "#fff",
+                                      width:120+"px",
+                                      height: 44+"px",
+                                      
+                                        
+                                  }}>
                                     Add List Item
                                   </button>
                                 </div>
-                              );
+                              ) 
+ 
+
                             })}
                     
                             {/* Button to add a new step */}
-                            <button type="button" onClick={handleAddStep}>
+                            <button type="button" onClick={handleAddStep}  style={{
+                                    
+                                    background: "#405cf5",
+                                    borderRadius: 6+'px',
+                                    marginTop:10+"px",
+                                    color: "#fff",
+                                    width:120+"px",
+                                    height: 44+"px",
+                                    
+                                      
+                                }}>
                               Add Step
                             </button>
                           </div>

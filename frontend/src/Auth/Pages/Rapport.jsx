@@ -4,38 +4,55 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import AppBarComponent from "../Components/AppBarComponent";
 import SideBar from "../Components/SideBar";
 import BilanDetails from "../Components/BilanDetails";
+import axios from "axios";
+
 
 const Rapport = () => {
   const [showFirstMain, setShowFirstMain] = useState(true);
   const [total, setTotal] = useState(0);
-  const [year, setYear] = useState(2024);
+  const [year, setYear] = useState(2025);
   const [scope1, setScope1] = useState(0);
   const [scope2, setScope2] = useState(0);
   const [scope3, setScope3] = useState(0);
-  const Data = JSON.parse(localStorage.getItem("ClientBilan"));
-  const calculateScopeEmissions = () => {
-    console.log("emissionPosts", Data.emissionPosts);
+  let Data={
+    year:2025,
+    scope1:0,
+    scope2:0,
+    scope3:0
+  };
+  const token = localStorage.getItem("token");
+
+  const calculateScopeEmissions =async () => {
+
+    
+      try {
+        const response = await axios.get("http://localhost:3000/api/bilans/all", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        localStorage.setItem("ClientBilan", JSON.stringify(response.data.carbonFootprints[0]))
+        
+          console.log("response.data.carbonFootprints",response.data.carbonFootprints)
+        const filteredObjects = response.data.carbonFootprints.filter(obj => obj.clientId === localStorage.getItem("clientId"));
+        console.log("filteredObjects",filteredObjects)
+        if(filteredObjects[0]){
+
+          Data= filteredObjects[0]
+        }
+        // localStorage.setItem("clientId",response.data.clientId)
+        
+      } catch (error) {
+        console.error("Error fetching client bilans:", error);
+        throw error;
+    };
+    
   
-    let scope1Total = 0;
-    let scope2Total = 0;
-    let scope3Total = 0;
+    let scope1Total = Data.scope1;
+    let scope2Total = Data.scope2;
+    let scope3Total = Data.scope3;
   
-    Data.emissionPosts.forEach((element) => {
-      if (
-        element.index === 1.1 ||
-        element.index === 1.2 ||
-        element.index === 1.3 ||
-        element.index === 1.4 ||
-        element.index === 1.5
-      ) {
-        console.log("element.emissions", element.emissions);
-        scope1Total += element.emissions;
-      } else if (element.index === 2.1 || element.index === 2.2) {
-        scope2Total += element.emissions;
-      } else {
-        scope3Total += element.emissions;
-      }
-    });
+    
   
     // Set the states all at once after calculating the totals
     setScope1(scope1Total);
@@ -50,6 +67,18 @@ const Rapport = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
+
+  const units = {
+    kg: 1, // Base unit
+    tonne: 1000,
+  };
+
+  const isTonne = total >= 1_000_000; // Use tonne if total is 1,000,000 or more
+  const unit = isTonne ? "tonne" : "kg";
+  const displayValue = isTonne ? (total / 1000).toFixed(3) : total.toFixed(3);
+
+  const unitFactor = units[unit] || 1; // Default to 1 if the unit is not found
+  const convertedTotal = (total / unitFactor).toFixed(3);
 
   return (
     <Grid container>
@@ -98,7 +127,7 @@ const Rapport = () => {
                     }}
                   >
                     <Grid container spacing={2}>
-                      {/* Titre Rapport annuel d'émissions 2024 */}
+                      {/* Titre Rapport annuel d'émissions 2025 */}
                       <Grid item xs={12} md={9}>
                         <Typography
                           sx={{
@@ -166,11 +195,8 @@ const Rapport = () => {
                                 marginRight: { md: "25px" },
                               }}
                             >
-                              {(total).toFixed(3)}
-                              <span className="text-black text-[5vh]">
-                                {" "}
-                                kg CO2e
-                              </span>
+                              {convertedTotal}
+                              <span style={{fontSize:17+"px"}} className="text-black text-[5vh]"> {unit} CO₂e</span>
                             </Typography>
                           </Grid>
                         </Paper>
@@ -258,16 +284,24 @@ const Rapport = () => {
                                       marginRight: { md: "25px" },
                                     }}
                                   >
-                                    {item === 1
-                                      ? (scope1 ).toFixed(3)
-                                      : item === 2
-                                      ? (scope2 ).toFixed(3)
-                                      : (scope3 ).toFixed(3)}
-                                    <span className="text-black text-[5vh]">
-                                      {" "}
-                                      KG CO2e
-                                    </span>
+                                    {(() => {
+                                      // Determine the value based on the item
+                                      const value = item === 1 ? scope1 : item === 2 ? scope2 : scope3;
+                                      
+                                      // Check if the value should be in tonnes
+                                      const isTonne = value >= 1_000_000; // 1,000,000 KG = 1 Tonne
+                                      const displayValue = isTonne ? (value / 1000).toFixed(3) : value.toFixed(3);
+                                      const unit = isTonne ? "Tonne" : "KG";
+
+                                      return (
+                                        <>
+                                          {displayValue}
+                                          <span style={{fontSize:17+"px"}} className="text-black text-[5vh]"> {unit} CO₂e</span>
+                                        </>
+                                      );
+                                    })()}
                                   </Typography>
+
                                 </Grid>
                               </Paper>
                             </Grid>

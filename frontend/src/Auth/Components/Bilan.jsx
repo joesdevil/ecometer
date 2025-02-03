@@ -96,7 +96,7 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
 
 
   const data = {
-    year: 2024,
+    year: 2025,
     clientId: "66661fd621a877d16ef65508",  
     selectedCategoryElements:[]
     // selectedCategoryElements: [
@@ -217,7 +217,7 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                 style={Styles.TitreText}
                 textAlign={{ xs: "center", md: "start" }}
               >
-                {showUpload?"DATA BASE":"Bilan Carbone"}
+                {showUpload?"Base de Données":"Bilan Carbone"}
                 
               </Typography>
             </Grid>
@@ -255,44 +255,69 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                       </LocalizationProvider>
                     </Grid>
                   </Grid>
-                </Grid><Grid item md={12} xs={12}>
-                    <Grid container spacing={2}>
-                      <Grid item md={4.2} xs={12}>
-                        <Typography style={Styles.bodyText}>Pays</Typography>
+                </Grid>
 
-
-                        <Select
-                          fullWidth
-                          sx={{
-                            borderRadius: "15px",
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
+                  <Grid item md={12} xs={12}>
+                      <Grid container spacing={2}>
+                        <Grid item md={4.2} xs={12}>
+                          <Typography style={Styles.bodyText}>Pays</Typography>
+                          <Select
+                            fullWidth
+                            sx={{
                               borderRadius: "15px",
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                            "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                          }}
-                          value={selectedPays}
-                          onChange={(e) => setSelectedPays(e.target.value)}
-                        >
-                          <MenuItem disabled value="">
-                            Selectionner pays
-                          </MenuItem>
-                          {pays.map((pays) => (
-                            <MenuItem key={pays.id} value={pays.id}>
-                              {pays.name}
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                              "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#EEF5FC !important",
+                                borderRadius: "15px",
+                              },
+                            }}
+                            value={selectedPays}
+                            onChange={(e) => setSelectedPays(e.target.value)}
+                          >
+                            <MenuItem disabled value="">
+                              Selectionner pays
                             </MenuItem>
-                          ))}
-                        </Select>
+                            {pays.map((pays) => (
+                              <MenuItem key={pays.id} value={pays.id}>
+                                {pays.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid><Grid item md={12} xs={12}>
+                    <Grid item md={12} xs={12}>
+                      <Grid container spacing={2}>
+                        <Grid item md={4.2} xs={12}>
+                          <Typography style={Styles.bodyText}>Nom d'entreprise</Typography>
+                          <input
+                            fullWidth
+                            style={{
+                              width:400 + 'px',
+                              height:50+'px',
+                              background:"#eef5fc",
+                              borderRadius:8+'px',
+                              padding:5 + 'px',
+                              outline:"none"
+                            }}
+                            type="text"
+                          
+                          />
+                             
+                            
+                          
+                        </Grid>
+                      </Grid>
+                    </Grid>
+
+                  <Grid item md={12} xs={12}>
                     <Grid container spacing={2}>
                       <Grid item md={4.2} xs={12}>
                         <Typography style={Styles.bodyText}>wilaya</Typography>

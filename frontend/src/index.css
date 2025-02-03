@@ -16,5 +16,6 @@ body {
 
 .bg-slate-90{
     --tw-bg-opacity: 1;
-  background-color: rgba(102, 153, 12, 0.7);
+    /* background: linear-gradient(90deg, #00417C, #0041E8); */
+
 }

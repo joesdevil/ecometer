@@ -11,7 +11,7 @@ function Sectionii() {
             src="/globe.svg"
             alt="SVG Image"
           ></img>
-          <div className="text-[2.9vh] leading-5 text-[Black] text-center max-w-full  pt-5">
+          <div style={{lineHeight:1.2}} className="text-[2.9vh] leading-5 text-[Black] text-center max-w-full  pt-5">
             Comprenez l&apos;impact de vos
             <br /> activités sur
             <br /> l&apos;environnement.
@@ -23,19 +23,19 @@ function Sectionii() {
             src="/presentation-chart-bar.svg"
             alt="SVG Image"
           ></img>
-          <div className="text-[2.9vh] leading-5  text-[Black] text-center max-w-full  pt-5">
+          <div style={{lineHeight:1.2}} className="text-[2.9vh] leading-5   text-[Black] text-center max-w-full  pt-5">
             Respectez les exigences
             <br /> réglementaires en évaluant
             <br /> vos émissions de carbone.
           </div>
         </div>
-        <div className="w-3/12 leading-5 items-center">
+        <div  className="w-3/12 leading-5 items-center">
           <img
             className="block h-[6.5vh] m-auto"
             src="/chart-pie.svg"
             alt="SVG Image"
           ></img>
-          <div className="text-[2.9vh] leading-5 text-[Black] text-center max-w-full  pt-5">
+          <div style={{lineHeight:1.2}} className="text-[2.9vh] leading-5 text-[Black] text-center max-w-full  pt-5">
             Évaluez votre performance
             <br /> par rapport à l&apos;industrie.
           </div>
@@ -46,7 +46,7 @@ function Sectionii() {
             src="/home.svg"
             alt="SVG Image"
           ></img>
-          <div className="text-[2.9vh] text-[Black] leading-5 text-center max-w-full  pt-5">
+          <div style={{lineHeight:1.2}} className="text-[2.9vh] text-[Black] leading-5 text-center max-w-full  pt-5">
             {" "}
             Montrez votre engagement
             <br /> en gérant votre empreinte
