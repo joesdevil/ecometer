@@ -1,4 +1,6 @@
 const Client = require("../Models/Client");
+const ClientQuestion = require("../Models/ClientQuestion");
+
 const Admin = require("../Models/Admin");
 const VerificationToken = require("../Models/verificationToken");
 const ResetToken = require("../Models/resetToken");
@@ -6,6 +8,9 @@ const crypto = require("crypto");
 const { createRandomBytes } = require("../utils/helper");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("../utils/cloudinary");
+const xlsx = require('xlsx');
+const fs = require("fs");
+const PDFDocument = require('pdfkit');
 const {
   generateOTP,
   mailTransport,
@@ -51,9 +56,6 @@ const registerClient = async (req, res) => {
 
 const password = formatName(name) + generateFourDigitNumber();
 
- 
-  console.log("code is ==>",password);
-  console.log("sending body req")
   try {
     // Create a new client using Model.create()
     const profilePicture = req.body.profilePicture; // Should be a base64 string or a valid URL
@@ -376,6 +378,147 @@ const resetPassword = async (req, res) => {
   }
 };
 
+
+
+// upload quest*ion for client 
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      const uploadPath = path.join(__dirname, "../uploads");
+      if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath, { recursive: true });
+      }
+      cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+
+
+const upload = multer({ storage: storage });
+const path = require('path');
+const pdf = require('pdfkit');
+
+
+const getQstsforClient = async (req, res) => {
+  const clientId = req.params.clientId;
+  const data = await ClientQuestion.findOne({ "asnwered": false, "clientId": clientId })
+   
+    
+    res.json(data);
+ 
+}
+
+const getQstsforClients = async (req, res) => {
+  const clientId = req.clientId;
+
+  console.log("lii->", clientId);
+
+  if (!isValidObjectId(clientId)) {
+    return res.status(400).json({ msg: "Invalid client ID" });
+  }
+
+  try {
+    const clientQst = await ClientQuestion.findOne({ "asnwered": false, "clientId": clientId });
+
+    if (!clientQst) {
+      return res.status(200).json({ data: null });
+    }
+    console.log("clientQst",clientQst)
+
+    return res.status(200).json(clientQst);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+const updateQstsforClients = async (req,res) =>{
+   
+  const clientId = req.body.clientId;
+  const data = req.body.data;
+
+
+  if (!isValidObjectId(clientId)) {
+    return res.status(400).json({ msg: "Invalid client ID" });
+  }
+
+  try {
+    const clientQuestion = await ClientQuestion.findOne({"asnwered":false,"clientId":clientId});
+
+    clientQuestion.data = data;
+    await clientQuestion.save();
+    if (!clientQuestion) {
+      return res.status(404).json({ msg: "Client questions saved" });
+    }
+
+    return res.status(200).json(clientQuestion);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+// Define the upload route
+// router.post("/api/clients/uploadQstsforClients", upload.single("file"), 
+const uploadQstsforClients = async (req, res) => {
+  if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded." });
+  } 
+  const clientId= req.body.clientId;
+
+  const filePath = path.join(__dirname, "../uploads", req.file.filename);
+
+  try {
+    const clientId = req.body.clientId;
+    if (!clientId) {
+      return res.status(400).json({ error: "clientId is required" });
+    }
+
+    const filePath = req.file.path;
+    const workbook = xlsx.readFile(filePath);
+    let extractedData = {};
+
+    workbook.SheetNames.forEach((sheet) => {
+      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheet], {
+        header: 1, // Read as an array of rows instead of key-value pairs
+        defval: "", // Ensures missing values are empty
+      });
+    
+      if (sheetData.length < 2) return; // Skip empty sheets or sheets with only headers
+    
+      extractedData[sheet] = {};
+    
+      // Start from index 1 to skip headers
+      for (let i = 1; i < sheetData.length; i++) {
+        const row = sheetData[i];
+        if (row.length < 1 || !row[0]) continue; // Skip empty rows
+    
+        const question = row[0];
+        extractedData[sheet][question] = ""; // Default empty answer
+      }
+    });
+    
+
+    fs.unlinkSync(filePath); // Delete file after processing
+
+    // Save to MongoDB
+    const newEntry = new ClientQuestion({
+      clientId:  clientId,
+      answered: false,
+      data: extractedData,
+    });
+
+    await newEntry.save();
+    res.json({ message: "File uploaded and data saved successfully!" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // get a clients profile
 const getClientProfile = async (req, res) => {
   const clientId = req.clientId;
@@ -521,16 +664,76 @@ const getAllClients = async (req, res) => {
   }
 };
 
+const generatePDF = async (req, res) => {
+  const clientId = req.params.clientId;
+
+  console.log("-->",clientId)
+  if (!isValidObjectId(clientId)) {
+    return res.status(400).json({ msg: "Invalid client ID" });
+  }
+ 
+    const client = await Client.findById(clientId);
+    
+    if (!client) {
+      return res.status(404).json({ msg: "Client not found" });
+    }
+
+    const data = await ClientQuestion.findOne({ "asnwered": false, "clientId": clientId })
+    
+    if (!data) {
+    
+      return res.status(404).json({ msg: "Client questions not found" });
+    }
+
+    const doc = new PDFDocument();
+
+    // Set response headers to trigger download
+    res.setHeader("Content-Disposition", 'attachment; filename="questions.pdf"');
+    res.setHeader("Content-Type", "application/pdf");
+
+    // Pipe the PDF to the response
+    doc.pipe(res);
+
+    // Add content to the PDF
+    doc.fontSize(20).text(`Client: ${client.name}`, { align: 'center' });
+    doc.moveDown();
+
+    // Iterate through the questions and answers
+    for (const [sheet, questions] of Object.entries(data.data)) {
+      doc.fontSize(14).text(`${sheet}`, { continued: true });
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      for (const [qst, ans] of Object.entries(data.data[sheet])) {
+        doc.moveDown(1.5); // Add padding top of 10
+      doc.fontSize(14).text(` ${qst} :`, { continued: true });
+      doc.fontSize(14).text(` ${ans}`, { align: 'right' });
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      }
+
+      doc.moveDown();
+    }
+
+    // Finalize the document
+    doc.end();
+  
+};
+
 module.exports = {
   registerClient,
   loginClient,
   verifyEmail,
-  forgotPassword, 
+  forgotPassword,
   resetPassword,
+  uploadQstsforClients,
   getClientProfile,
+  getQstsforClients,
+  getQstsforClient,
   updateClientProfile,
   deleteClient,
   updateClientPassword,
+  updateQstsforClients,
   getAllClients,
-  reverifyClient
+  reverifyClient,
+  generatePDF
 };

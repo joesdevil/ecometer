@@ -66,7 +66,9 @@ const SideBar = () => {
 
   useEffect(() => {
     const clientId = localStorage.getItem("clientId");
+     
     if (clientId) {
+      
       axios.get(`http://localhost:3000/api/clients/profile`, {
         headers: {
           'clientId': clientId,
@@ -172,6 +174,19 @@ const SideBar = () => {
             </ListItem>
             )}
          
+         {isAdmin && (
+              <ListItem
+              button
+              selected={location.pathname === "/QuestionsUpload"}
+              style={listItemStyle}
+              onClick={() => handleListItemClick("/QuestionsUpload")}
+            >
+              <ListItemIcon style={{ color: "#fff" }}>
+                <UploadIcon />
+              </ListItemIcon>
+              <ListItemText primary="Questions Upload" style={listItemTextStyle} />
+            </ListItem>
+            )}
 
           <ListItem
             button

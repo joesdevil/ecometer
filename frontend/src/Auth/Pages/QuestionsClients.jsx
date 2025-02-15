@@ -1,14 +1,15 @@
 import SideBar from "../Components/SideBar";
 import AppBarComponent from "../Components/AppBarComponent";
-
-
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Box, Grid, Paper, Typography } from "@mui/material";
+import { toast } from 'react-toastify';
 
 const containerStyle = {
     maxWidth: '600px',
     margin: '0 auto',
-    padding: '20px', 
-    borderRadius: '10px', 
+    padding: '20px',
+    borderRadius: '10px',
 };
 
 const formGroupStyle = {
@@ -30,90 +31,123 @@ const inputStyle = {
 };
 
 const buttonStyle = {
-    padding: '10px 20px', 
+    padding: '10px 20px',
     color: '#fff',
-    border: 'none',
+    border: '1px solid blue',
+    background:"#00f",
     borderRadius: '5px',
     cursor: 'pointer'
+
 };
 
 const QuestionsClients = ({ showFirstMain }) => {
-  
+    const [questions, setQuestions] = useState([]);
+
+    // request to get questions
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const clientId = localStorage.getItem('clientId');
+
+        axios.get(`http://localhost:3000/api/clients/getQstsforClients`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                console.log("**>", response.data);
+                setQuestions(response.data.data);
+                // setLoading(false);
+            })
+            .catch(error => {
+                toast.error(error.response.data.msg);
+                console.error('There was an error fetching the clients!', error);
+                // setLoading(false);
+            });
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value, dataset } = e.target;
+        const section = dataset.type;
+
+        setQuestions(prevQuestions => ({
+            ...prevQuestions,
+            [section]: {
+                ...prevQuestions[section],
+                [name]: value
+            }
+        }));
+        
+    };
+
+    const submit = (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('token');
+        const clientId = localStorage.getItem('clientId');
+
+        axios.put(`http://localhost:3000/api/clients/updateQstsforClients`, {
+            clientId:clientId,
+            data:questions
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            toast.success("Questions updated successfully!");
+        })
+        .catch(error => {
+            toast.error(error.response.data.msg);
+            console.error('There was an error updating the questions!', error);
+        });
+    }
+
 
     return (
         <Grid container>
-        {/* Sidebar */}
-        <Grid
-          item
-          md={2.1}
-          sx={{ minHeight: "100vh", display: { xs: "none", md: "block" } }}
-        >
-          <SideBar />
-        </Grid>
-  
-        {/* Main Content */}
-        <Grid item md={9.9} xs={12}>
-        <AppBarComponent
-              title={showFirstMain ? "Questionnaires": "Questionnaires"}
-            />
-          <Grid container height={"auto"}>
+            {/* Sidebar */}
+            <Grid
+                item
+                md={2.1}
+                sx={{ minHeight: "100vh", display: { xs: "none", md: "block" } }}
+            >
+                <SideBar />
+            </Grid>
 
-        <div style={containerStyle}>
-            
-            <h1>Carbon Footprint Questionnaire</h1>
-            <form>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>1. How many people live in your household?</label>
-                    <input type="number" name="householdSize" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>2. What is the average monthly electricity consumption of your household (in kWh)?</label>
-                    <input type="number" name="electricityConsumption" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>3. How many kilometers do you drive per week?</label>
-                    <input type="number" name="weeklyKilometersDriven" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>4. What type of vehicle do you drive?</label>
-                    <select name="vehicleType" style={inputStyle}>
-                        <option value="petrol">Petrol</option>
-                        <option value="diesel">Diesel</option>
-                        <option value="electric">Electric</option>
-                        <option value="hybrid">Hybrid</option>
-                    </select>
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>5. How often do you use public transportation per week?</label>
-                    <input type="number" name="publicTransportUsage" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>6. How many flights do you take per year?</label>
-                    <input type="number" name="annualFlights" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>7. How much meat do you consume per week (in kg)?</label>
-                    <input type="number" name="weeklyMeatConsumption" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>8. How much dairy do you consume per week (in kg)?</label>
-                    <input type="number" name="weeklyDairyConsumption" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>9. How much waste does your household produce per week (in kg)?</label>
-                    <input type="number" name="weeklyWasteProduction" style={inputStyle} />
-                </div>
-                <div style={formGroupStyle}>
-                    <label style={labelStyle}>10. Do you recycle? If yes, what percentage of your waste is recycled?</label>
-                    <input type="number" name="recyclingPercentage" style={inputStyle} />
-                </div>
-                <button type="submit" style={buttonStyle}>Submit</button>
-            </form>
-        </div>
-        </Grid>
-        </Grid>
-        </Grid>
+            {/* Main Content */}
+            <Grid item md={9.9} xs={12}>
+                <AppBarComponent
+                    title={showFirstMain ? "Questionnaires" : "Questionnaires"}
+                />
+                <Grid container height={"auto"}>
 
+                    <div style={containerStyle}>
+
+                        <h1>Carbon Footprint Questionnaire</h1>
+                        <form>
+                            {Object.keys(questions).map((section, sectionIndex) => (
+                                <div key={sectionIndex}>
+                                    <Typography variant="h6" gutterBottom>{section}</Typography>
+                                    {Object.keys(questions[section]).map((question, questionIndex) => (
+                                        <div key={questionIndex} style={formGroupStyle}>
+                                            <label style={labelStyle}>{questionIndex + 1}. {question}</label>
+                                            <input
+                                                data-type={section}
+                                                type="text"
+                                                name={question}
+                                                style={inputStyle}
+                                                value={questions[section]?.[question] || ''}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                            <button onClick={submit} type="submit" style={buttonStyle}>Submit</button>
+                        </form>
+                    </div>
+                </Grid>
+            </Grid>
+        </Grid>
     );
 };
 

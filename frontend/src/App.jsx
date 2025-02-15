@@ -22,6 +22,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ThankYou from "./logIn/thankyou.jsx";
 import QuestionsClients from "./Auth/Pages/QuestionsClients.jsx";
+import QuestionsUpload from "./Auth/Pages/QuestionsUpload.jsx";
+
 import Clients from "./Auth/Pages/Clients.jsx";
 
 
@@ -104,6 +106,15 @@ function App() {
                 element={
                   <RequireAuth>
                     <QuestionsClients />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/QuestionsUpload"
+                element={
+                  <RequireAuth>
+                    <QuestionsUpload />
                   </RequireAuth>
                 }
               />

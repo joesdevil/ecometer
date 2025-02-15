@@ -168,6 +168,10 @@ const ClientSchema = new mongoose.Schema({
 });
 
 
+
+
+
+
 ClientSchema.pre('save', async function(next) {
   // Check if the password field is modified or is new
   if (!this.isModified('password')) {
@@ -211,10 +215,10 @@ usersConnection.once('open', function() {
   console.log("Connected to users database");
 });
 
-const Client = usersConnection.model('Client', ClientSchema,'clients');
+const Client = usersConnection.model('Client', ClientSchema,'clients'); 
 
 
-module.exports = Client;
+module.exports = Client ;
 
 
 

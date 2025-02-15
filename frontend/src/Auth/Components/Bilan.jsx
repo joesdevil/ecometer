@@ -95,37 +95,11 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
   };
 
 
+  const currentYear = new Date().getFullYear();
   const data = {
-    year: 2025,
+    year: currentYear,
     clientId: "66661fd621a877d16ef65508",  
-    selectedCategoryElements:[]
-    // selectedCategoryElements: [
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [], //7
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [], //15
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [],
-    //   [], //21
-    //   [], //22
-    //   [], //23
-    //   [], //23
-    //   [], //23
-    // ],
+    selectedCategoryElements: []
   };
   const handleClick = () => {
     localStorage.setItem("db_type", selectedDb);
@@ -169,15 +143,42 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
   const wilayas = ["Alger", "Oran", "Tizi Ouzou"];
   const [dbs_type, setDbs_type] = useState(["Agribalyse","ademe", ]);
   const [selectedPays, setSelectedPays] = useState("");
+  const [selectedClient, setSelectedClient] = useState("");
   const [selectedWilaya, setSelectedWilaya] = useState("");
   const [selectedDb, setSelectedDb] = useState("");
   const [loading, setLoading] = useState(false);
   const [clickedIcon, setClickedIcon] = useState(false);
   const [uploadedfiles, setUploadedFiles] = useState([]);
-
+  const [clients, setClients] = useState([]);
    
   useEffect(() => {
     // Define the async function to fetch data
+    const getClients = async()=>{
+      setLoading(true)
+      try {
+         const token = localStorage.getItem('token');
+
+        axios.get(`http://localhost:3000/api/clients/getAll`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setClients(response.data);
+                console.log("->",response.data)
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('There was an error fetching the clients!', error);
+                setLoading(false);
+            });
+        
+      } catch (err) {
+        console.log('Failed to fetch dbs');
+      } finally {
+        setLoading(false);
+      }
+    }
     const fetchDbs = async () => {
       try {
         // Replace with your API endpoint
@@ -194,7 +195,7 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
 
     // Call the function
     fetchDbs();
-     
+     getClients()
   }, []);
 
   return (
@@ -217,14 +218,13 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                 style={Styles.TitreText}
                 textAlign={{ xs: "center", md: "start" }}
               >
-                {showUpload?"Base de Données":"Bilan Carbone"}
-                
+                {showUpload ? "Base de Données" : "Bilan Carbone"}
               </Typography>
             </Grid>
 
-            {
-              !showUpload?
-              <><Grid item md={12} xs={12}>
+            {!showUpload ? (
+              <>
+                <Grid item md={12} xs={12}>
                   <Grid container direction={"row"} spacing={2}>
                     <Grid item md={4.2} xs={12}>
                       <Typography style={Styles.bodyText}>Année</Typography>
@@ -235,7 +235,6 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                               fullWidth: true,
                               sx: {
                                 borderRadius: "15px",
-
                                 "& .MuiOutlinedInput-notchedOutline": {
                                   borderColor: "#EEF5FC !important",
                                   borderRadius: "15px",
@@ -251,240 +250,265 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                               },
                             },
                           }}
-                          placeholder="A" />
+                          placeholder="A"
+                        />
                       </LocalizationProvider>
                     </Grid>
                   </Grid>
                 </Grid>
 
-                  <Grid item md={12} xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item md={4.2} xs={12}>
-                          <Typography style={Styles.bodyText}>Pays</Typography>
-                          <Select
-                            fullWidth
-                            sx={{
-                              borderRadius: "15px",
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#EEF5FC !important",
-                                borderRadius: "15px",
-                              },
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#EEF5FC !important",
-                                borderRadius: "15px",
-                              },
-                              "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#EEF5FC !important",
-                                borderRadius: "15px",
-                              },
-                            }}
-                            value={selectedPays}
-                            onChange={(e) => setSelectedPays(e.target.value)}
-                          >
-                            <MenuItem disabled value="">
-                              Selectionner pays
-                            </MenuItem>
-                            {pays.map((pays) => (
-                              <MenuItem key={pays.id} value={pays.id}>
-                                {pays.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid item md={12} xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item md={4.2} xs={12}>
-                          <Typography style={Styles.bodyText}>Nom d'entreprise</Typography>
-                          <input
-                            fullWidth
-                            style={{
-                              width:400 + 'px',
-                              height:50+'px',
-                              background:"#eef5fc",
-                              borderRadius:8+'px',
-                              padding:5 + 'px',
-                              outline:"none"
-                            }}
-                            type="text"
-                          
-                          />
-                             
-                            
-                          
-                        </Grid>
-                      </Grid>
-                    </Grid>
-
-                  <Grid item md={12} xs={12}>
-                    <Grid container spacing={2}>
-                      <Grid item md={4.2} xs={12}>
-                        <Typography style={Styles.bodyText}>wilaya</Typography>
-
-                        <Select
-                          fullWidth
-                          sx={{
+                <Grid item md={12} xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item md={4.2} xs={12}>
+                      <Typography style={Styles.bodyText}>Pays</Typography>
+                      <Select
+                        fullWidth
+                        sx={{
+                          borderRadius: "15px",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
                             borderRadius: "15px",
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                            "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                          }}
-                          value={selectedWilaya}
-                          onChange={(e) => setSelectedWilaya(e.target.value)}
-                        >
-                          <MenuItem disabled value="">
-                            Selectionner Wilaya
-                          </MenuItem>
-                          {wilayas.map((wilayas) => (
-                            <MenuItem key={wilayas} value={wilayas}>
-                              {wilayas}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Grid>
-                    </Grid>
-                  </Grid><Grid item md={12} xs={12}>
-                    <Grid container spacing={2}>
-                      <Grid item md={4.2} xs={12}>
-                        <Typography style={Styles.bodyText}>Base des données</Typography>
-                        <Select
-                          fullWidth
-                          sx={{
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
                             borderRadius: "15px",
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                            "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#EEF5FC !important",
-                              borderRadius: "15px",
-                            },
-                          }}
-                          value={selectedDb}
-                          onChange={(e) =>{ 
-                            setSelectedDb(e.target.value)
-                            localStorage.setItem("db_type",e.target.value)
-
-                          }}
-                        >
-                          <MenuItem disabled value="">
-                            Selectionner DB type
+                          },
+                          "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                        }}
+                        value={selectedPays}
+                        onChange={(e) => setSelectedPays(e.target.value)}
+                      >
+                        <MenuItem disabled value="">
+                          Selectionner pays
+                        </MenuItem>
+                        {pays.map((pays) => (
+                          <MenuItem key={pays.id} value={pays.id}>
+                            {pays.name}
                           </MenuItem>
-                          {dbs_type.map((db_type,key) => (
-                            <MenuItem key={key} value={db_type.dbName}>
-                              {db_type.dbName}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <DocxViewer dbName={selectedDb} />
-                      </Grid>
+                        ))}
+                      </Select>
                     </Grid>
-                  </Grid></>
-            : ""
-            }
-          
+                  </Grid>
+                </Grid>
 
-
-          {
-            showUpload?
-            <Grid item md={12} xs={12}>
-            <Grid container spacing={2}>
-              <Grid item md={4.2} xs={12} sx={{margin:"auto"}}>
-              <UploadDBIcon  />
                 
 
-                <input onChange={handleFileUpload} fullWidth type="file" name="excelfile" id="excelfile"  sx={{
-                    borderRadius: "15px",
-                   
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#EEF5FC !important",
-                      borderRadius: "15px",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#EEF5FC !important",
-                      borderRadius: "15px",
-                    },
-                    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#EEF5FCD !important",
-                      borderRadius: "15px",
-                    },
-                    
-                  }}/>
-                 {loading && <CircularProgress />}
-                  
-                  
-              
-              </Grid>
-            </Grid>
-          </Grid> : ""
-          }
-           
-            
+                <Grid item md={12} xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item md={4.2} xs={12}>
+                      <Typography style={Styles.bodyText}>wilaya</Typography>
 
-            
-            
+                      <Select
+                        fullWidth
+                        sx={{
+                          borderRadius: "15px",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                        }}
+                        value={selectedWilaya}
+                        onChange={(e) => setSelectedWilaya(e.target.value)}
+                      >
+                        <MenuItem disabled value="">
+                          Selectionner Wilaya
+                        </MenuItem>
+                        {wilayas.map((wilayas) => (
+                          <MenuItem key={wilayas} value={wilayas}>
+                            {wilayas}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                <Grid item md={12} xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item md={4.2} xs={12}>
+                      <Typography style={Styles.bodyText}>Client</Typography>
+                      <Select
+                        fullWidth
+                        sx={{
+                          borderRadius: "15px",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                        }}
+                        value={selectedClient}
+                        onChange={(e) => setSelectedClient(e.target.value)}
+                      >
+                        <MenuItem disabled value="">
+                          Selectionner Client
+                        </MenuItem>
+                        {clients.map((client) => (
+                          <MenuItem key={client.id} value={client.name}>
+                            {client.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+
+                <Grid item md={12} xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item md={4.2} xs={12}>
+                      <Typography style={Styles.bodyText}>Base des données</Typography>
+                      <Select
+                        fullWidth
+                        sx={{
+                          borderRadius: "15px",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                          "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#EEF5FC !important",
+                            borderRadius: "15px",
+                          },
+                        }}
+                        value={selectedDb}
+                        onChange={(e) => {
+                          setSelectedDb(e.target.value);
+                          localStorage.setItem("db_type", e.target.value);
+                        }}
+                      >
+                        <MenuItem disabled value="">
+                          Selectionner DB type
+                        </MenuItem>
+                        {dbs_type.map((db_type, key) => (
+                          <MenuItem key={key} value={db_type.dbName}>
+                            {db_type.dbName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <DocxViewer dbName={selectedDb} />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </>
+            ) : (
+              ""
+            )}
+
+            {showUpload ? (
+              <Grid item md={12} xs={12}>
+                <Grid container spacing={2}>
+                  <Grid item md={4.2} xs={12} sx={{ margin: "auto" }}>
+                    <UploadDBIcon />
+
+                    <input
+                      onChange={handleFileUpload}
+                      fullWidth
+                      type="file"
+                      name="excelfile"
+                      id="excelfile"
+                      sx={{
+                        borderRadius: "15px",
+
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#EEF5FC !important",
+                          borderRadius: "15px",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#EEF5FC !important",
+                          borderRadius: "15px",
+                        },
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#EEF5FCD !important",
+                          borderRadius: "15px",
+                        },
+                      }}
+                    />
+                    {loading && <CircularProgress />}
+                  </Grid>
+                </Grid>
+              </Grid>
+            ) : (
+              ""
+            )}
+
             <Grid item md={12} xs={12}>
               <Grid container spacing={2}>
                 <Grid item md={4.2} xs={12}>
-                {uploadedfiles.length > 0 && (
+                  {uploadedfiles.length > 0 && (
                     <>
-                      <Typography style={{ color: "green" }}>uploaded db files:</Typography>
+                      <Typography style={{ color: "green" }}>
+                        uploaded db files:
+                      </Typography>
                       <ul>
                         {uploadedfiles.map((item, index) => (
-                          <li key={index}><InsertDriveFileIcon style={{ marginRight: 8, color:"green" }} /> <a href="http://" target="_blank" rel="noopener noreferrer">{item}</a></li>
+                          <li key={index}>
+                            <InsertDriveFileIcon
+                              style={{ marginRight: 8, color: "green" }}
+                            />{" "}
+                            <a
+                              href="http://"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {item}
+                            </a>
+                          </li>
                         ))}
                       </ul>
                     </>
                   )}
-                                  
-                   
                 </Grid>
               </Grid>
             </Grid>
-            
+
             <Grid item md={12} xs={12}>
               <Grid container direction="row-reverse">
                 <Grid item md={2.36} xs={12}>
-                {showUpload?<Button
-                    variant="contained"
-                    fullWidth
-                    style={Styles.commencerButton}
-                    onClick={handleClickUpload}
-                    
-                  >
-                    Commencer
-                  </Button>
-                  :
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    style={Styles.commencerButton}
-                    onClick={handleClick}
-                    
-                  >
-                    Commencer
-                  </Button>
-                  }
-
-                  
+                  {showUpload ? (
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      style={Styles.commencerButton}
+                      onClick={handleClickUpload}
+                    >
+                      Commencer
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      style={Styles.commencerButton}
+                      onClick={handleClick}
+                    >
+                      Commencer
+                    </Button>
+                  )}
                 </Grid>
               </Grid>
-            </Grid>  
-           
+            </Grid>
           </Grid>
         </Paper>
       </ThemeProvider>
