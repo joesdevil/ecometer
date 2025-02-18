@@ -151,6 +151,7 @@ function Calculateur() {
       try {
         // Replace with your API endpoint
         const name=localStorage.getItem("db_type")
+
         const response = await axios.get(`http://localhost:3000/api/ModelDB/model/get_by_name/${name}` );
         console.log("active step",activeStep)
         console.log("sleected000",response.data.steps)
@@ -178,7 +179,8 @@ function Calculateur() {
   }, []);
 
 
-  const [showBilan, setShowBilan] = useState(false);
+  const [showBilan, setShowBilan] = useState(false); 
+  const [selectedClient, setSelectedClient] = useState(""); 
   const [emissionsListAgribalyse,setEmissionsListAgribalyse]=useState([
     {
       label: "émissions de produits alimentaire",
@@ -316,8 +318,8 @@ function Calculateur() {
     const bilan = JSON.parse(localStorage.getItem("Bilan"));
 
     // {"year":2025,"clientId":"66661fd621a877d16ef65508","selectedCategoryElements":[{"category":"Combustibles","sheetName":"Combustibles","quantity":555,"categoryElement":"6749a574b7f1ad30a89a4495"}]}'
-    console.log("handleReset bilan",bilan)
-    bilan["clientId"]=localStorage.getItem("clientId")
+    console.log("up to me ->",selectedClient)
+    bilan["clientId"]=selectedClient
     const token = localStorage.getItem("token");
     
       const headers = {
@@ -356,7 +358,7 @@ function Calculateur() {
    
  
   useEffect(() => {
-    console.log("activeStep hh",activeStep)
+     
     
     console.log("tett",dbs_type1)
     // Check if dbs_type1 has data and activeStep is valid
@@ -419,7 +421,7 @@ function Calculateur() {
                           gutterBottom
                           style={Styles.titreEtape}
                         >
-                          {steps[activeStep].label}
+                          {steps.length > 0 && activeStep < steps.length && steps[activeStep].label}
                         </Typography>
                       </Grid>
 
@@ -571,7 +573,12 @@ function Calculateur() {
             >
               <Grid container justifyContent={"center"} marginTop={"70px"}>
                 <Grid item xs={12} md={9.77}>
-                  <Bilan showBilan={showBilan} setShowBilan={setShowBilan} />
+                  <Bilan 
+                    showBilan={showBilan} 
+                    setShowBilan={setShowBilan} 
+                    selectedClient={selectedClient} 
+                    setSelectedClient={setSelectedClient} 
+                  />
                 </Grid>
               </Grid>
             </Grid>

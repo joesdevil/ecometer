@@ -112,6 +112,7 @@ const createBilan = async (req, res) => {
 
 
   const { clientId } = req.body;
+  console.log("-->",req.body)
   try {
     let postEmissions = [];
     let i = 0;

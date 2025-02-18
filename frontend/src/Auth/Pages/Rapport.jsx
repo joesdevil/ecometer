@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { useState, useEffect } from "react"; 
+import { Box, Grid, Typography, Paper, Select, MenuItem } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import AppBarComponent from "../Components/AppBarComponent";
 import SideBar from "../Components/SideBar";
 import BilanDetails from "../Components/BilanDetails";
 import axios from "axios";
-
 
 const Rapport = () => {
   const [showFirstMain, setShowFirstMain] = useState(true);
@@ -14,59 +13,124 @@ const Rapport = () => {
   const [scope1, setScope1] = useState(0);
   const [scope2, setScope2] = useState(0);
   const [scope3, setScope3] = useState(0);
-  let Data={
-    year:2025,
-    scope1:0,
-    scope2:0,
-    scope3:0
+  const [clients, setClients] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedClient, setSelectedClient] = useState("");
+
+  const Styles = {
+    commencerButton: {
+      fontFamily: "Inter , sans-serif",
+      height: "56px",
+      backgroundColor: "#003049",
+      borderRadius: "15px 15px 15px 15px",
+    },
+    bodyText: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: "18px",
+      fontWeight: 400,
+      lineHeight: "28px",
+      textAlign: "left",
+      color: "#000000",
+    },
+    TitreText: {
+      fontFamily: "Eudoxus, sans-serif",
+      fontWeight: "700",
+      fontSize: "30px",
+      lineHeight: "30px",
+    },
   };
+
+  let Data = {
+    year: 2025,
+    scope1: 0,
+    scope2: 0,
+    scope3: 0,
+  };
+
+  useEffect(() => {
+    const clientId = localStorage.getItem("clientId");
+     
+    if (clientId) {
+      axios.get(`http://localhost:3000/api/clients/profile`, {
+        headers: {
+          'clientId': clientId,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+        .then(response => {
+          console.log("isAdmin9-->",response.data.isAdmin)
+          setIsAdmin(response.data.isAdmin);
+        })
+        .catch(error => {
+          console.error("There was an error fetching the client data!", error);
+        });
+    }
+  }, [localStorage.getItem("clientId")]);
+
   const token = localStorage.getItem("token");
 
-  const calculateScopeEmissions =async () => {
-
+  const calculateScopeEmissions = async () => {
+    let filteredObjects;
     
-      try {
-        const response = await axios.get("http://localhost:3000/api/bilans/all", {
+    try {
+      const response = await axios.get("http://localhost:3000/api/bilans/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      localStorage.setItem("ClientBilan", JSON.stringify(response.data.carbonFootprints[0]));
+
+      if(isAdmin){
+        console.log("filteredObjects 0",isAdmin)
+        filteredObjects = response.data.carbonFootprints.filter(
+          (obj) => obj.clientId === selectedClient 
+        );
+      }else{
+        console.log("filteredObjects 1",isAdmin)
+        filteredObjects = response.data.carbonFootprints.filter(
+          (obj) => obj.clientId === localStorage.getItem("clientId") 
+        );
+      }
+      
+      if (filteredObjects[0]) {
+        Data = filteredObjects[0];
+      }
+
+      setScope1(Data.scope1);
+      setScope2(Data.scope2);
+      setScope3(Data.scope3);
+      setTotal(Data.scope1 + Data.scope2 + Data.scope3);
+      setYear(Data.year);
+    } catch (error) {
+      console.error("Error fetching client bilans:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if(isAdmin){
+      const token = localStorage.getItem("token");
+
+      axios
+        .get(`http://localhost:3000/api/clients/getAll`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        })
+        .then((response) => {
+          setClients(response.data);
+        })
+        .catch((error) => {
+          console.error("There was an error fetching the clients!", error);
         });
-        localStorage.setItem("ClientBilan", JSON.stringify(response.data.carbonFootprints[0]))
-        
-          console.log("response.data.carbonFootprints",response.data.carbonFootprints)
-        const filteredObjects = response.data.carbonFootprints.filter(obj => obj.clientId === localStorage.getItem("clientId"));
-        console.log("filteredObjects",filteredObjects)
-        if(filteredObjects[0]){
+    }
+  }, [isAdmin]);
 
-          Data= filteredObjects[0]
-        }
-        // localStorage.setItem("clientId",response.data.clientId)
-        
-      } catch (error) {
-        console.error("Error fetching client bilans:", error);
-        throw error;
-    };
-    
-  
-    let scope1Total = Data.scope1;
-    let scope2Total = Data.scope2;
-    let scope3Total = Data.scope3;
-  
-    
-  
-    // Set the states all at once after calculating the totals
-    setScope1(scope1Total);
-    setScope2(scope2Total);
-    setScope3(scope3Total);
-    setTotal(scope1Total + scope2Total + scope3Total);
-    setYear(Data.year);
-  };
-  
   useEffect(() => {
     calculateScopeEmissions();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  
+  }, [selectedClient]);
 
   const units = {
     kg: 1, // Base unit
@@ -141,6 +205,45 @@ const Rapport = () => {
                         </Typography>
                       </Grid>
 
+                      {isAdmin && (
+                        <Grid item md={12} xs={12}>
+                        <Grid container spacing={2}>
+                          <Grid item md={4.2} xs={12}>
+                            <Typography style={Styles.bodyText}>Client</Typography>
+                            <Select
+                              fullWidth
+                              sx={{
+                                borderRadius: "15px",
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#EEF5FC !important",
+                                  borderRadius: "15px",
+                                },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#EEF5FC !important",
+                                  borderRadius: "15px",
+                                },
+                                "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#EEF5FC !important",
+                                  borderRadius: "15px",
+                                },
+                              }}
+                              value={selectedClient}
+                              onChange={(e) => setSelectedClient(e.target.value)}
+                            >
+                              <MenuItem disabled value="">
+                                Selectionner Client
+                              </MenuItem>
+                              {clients.map((client) => (
+                                <MenuItem key={client._id} value={client._id}>
+                                  {client.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      )}
+
                       {/* Bouton Voir plus de détails */}
                       <Grid
                         item
@@ -196,7 +299,7 @@ const Rapport = () => {
                               }}
                             >
                               {convertedTotal}
-                              <span style={{fontSize:17+"px"}} className="text-black text-[5vh]"> {unit} CO₂e</span>
+                              <span style={{ fontSize: 17 + "px" }} className="text-black text-[5vh]"> {unit} CO₂e</span>
                             </Typography>
                           </Grid>
                         </Paper>
@@ -296,12 +399,11 @@ const Rapport = () => {
                                       return (
                                         <>
                                           {displayValue}
-                                          <span style={{fontSize:17+"px"}} className="text-black text-[5vh]"> {unit} CO₂e</span>
+                                          <span style={{ fontSize: 17 + "px" }} className="text-black text-[5vh]"> {unit} CO₂e</span>
                                         </>
                                       );
                                     })()}
                                   </Typography>
-
                                 </Grid>
                               </Paper>
                             </Grid>

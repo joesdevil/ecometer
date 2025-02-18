@@ -83,10 +83,19 @@ const QuestionsClients = ({ showFirstMain }) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         const clientId = localStorage.getItem('clientId');
+        let answered=false
+        const totalQuestions = Object.keys(questions).reduce((acc, section) => acc + Object.keys(questions[section]).length, 0);
+        const answeredQuestions = Object.keys(questions).reduce((acc, section) => acc + Object.values(questions[section]).filter(answer => answer.trim() !== '').length, 0);
+        const answeredPercentage = (answeredQuestions / totalQuestions) * 100;
+        if( answeredPercentage.toFixed(0) == 100){
+            answered=true
+            console.log("full")
+        } 
 
         axios.put(`http://localhost:3000/api/clients/updateQstsforClients`, {
             clientId:clientId,
-            data:questions
+            data:questions,
+            answered:answered
         }, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -121,29 +130,38 @@ const QuestionsClients = ({ showFirstMain }) => {
                 <Grid container height={"auto"}>
 
                     <div style={containerStyle}>
-
-                        <h1>Carbon Footprint Questionnaire</h1>
-                        <form>
-                            {Object.keys(questions).map((section, sectionIndex) => (
-                                <div key={sectionIndex}>
-                                    <Typography variant="h6" gutterBottom>{section}</Typography>
-                                    {Object.keys(questions[section]).map((question, questionIndex) => (
-                                        <div key={questionIndex} style={formGroupStyle}>
-                                            <label style={labelStyle}>{questionIndex + 1}. {question}</label>
-                                            <input
-                                                data-type={section}
-                                                type="text"
-                                                name={question}
-                                                style={inputStyle}
-                                                value={questions[section]?.[question] || ''}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                            <button onClick={submit} type="submit" style={buttonStyle}>Submit</button>
-                        </form>
+                    {questions && Object.keys(questions).length > 0 ? (
+                        <>
+                            <h1>Carbon Footprint Questionnaire</h1>
+                            <form>
+                                {Object.keys(questions).map((section, sectionIndex) => (
+                                    <div key={sectionIndex}>
+                                        <Typography variant="h6" gutterBottom>{section}</Typography>
+                                        {Object.keys(questions[section]).map((question, questionIndex) => (
+                                            <div key={questionIndex} style={formGroupStyle}>
+                                                <label style={labelStyle}>{questionIndex + 1}. {question}</label>
+                                                <input
+                                                    data-type={section}
+                                                    type="text"
+                                                    name={question}
+                                                    style={inputStyle}
+                                                    value={questions[section]?.[question] || ''}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                                <button onClick={submit} type="submit" style={buttonStyle}>Submit</button>
+                            </form>
+                        </>
+                    ) : (
+                        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                            <Typography variant="h6" color="green">
+                                ✔ All questions have been answered!
+                            </Typography>
+                        </Box>
+                    )}
                     </div>
                 </Grid>
             </Grid>

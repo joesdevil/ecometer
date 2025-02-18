@@ -86,12 +86,12 @@ const Styles = {
 
 
 
-function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) { 
+function Bilan({showBilan , setShowBilan, selectedClient,setSelectedClient ,showUpload=false,onButtonClick}) { 
   
 
   const handleClickUpload = () => {
     setShowBilan(!showBilan);
-    onButtonClick(); // Call the callback function passed from the parent
+    onButtonClick();
   };
 
 
@@ -105,6 +105,7 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
     localStorage.setItem("db_type", selectedDb);
     localStorage.removeItem("Bilan");
     localStorage.setItem("Bilan", JSON.stringify(data));
+    localStorage.setItem("selectedClientBilan", selectedClient);
     setShowBilan(!showBilan); // Inversion de l'état de showBilan
     // if (localStorage.getItem("'isConnected'")) {
     //   localStorage.setItem("Bilan", data);
@@ -143,7 +144,6 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
   const wilayas = ["Alger", "Oran", "Tizi Ouzou"];
   const [dbs_type, setDbs_type] = useState(["Agribalyse","ademe", ]);
   const [selectedPays, setSelectedPays] = useState("");
-  const [selectedClient, setSelectedClient] = useState("");
   const [selectedWilaya, setSelectedWilaya] = useState("");
   const [selectedDb, setSelectedDb] = useState("");
   const [loading, setLoading] = useState(false);
@@ -362,7 +362,7 @@ function Bilan({showBilan, setShowBilan ,showUpload=false,onButtonClick}) {
                           Selectionner Client
                         </MenuItem>
                         {clients.map((client) => (
-                          <MenuItem key={client.id} value={client.name}>
+                          <MenuItem key={client._id} value={client._id}>
                             {client.name}
                           </MenuItem>
                         ))}

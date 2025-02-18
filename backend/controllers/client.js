@@ -437,9 +437,12 @@ const getQstsforClients = async (req, res) => {
 }
 
 const updateQstsforClients = async (req,res) =>{
+
+
    
   const clientId = req.body.clientId;
   const data = req.body.data;
+  const answered = req.body.answered;
 
 
   if (!isValidObjectId(clientId)) {
@@ -450,6 +453,8 @@ const updateQstsforClients = async (req,res) =>{
     const clientQuestion = await ClientQuestion.findOne({"asnwered":false,"clientId":clientId});
 
     clientQuestion.data = data;
+    clientQuestion.asnwered=answered;
+
     await clientQuestion.save();
     if (!clientQuestion) {
       return res.status(404).json({ msg: "Client questions saved" });
